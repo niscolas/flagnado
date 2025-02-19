@@ -29,8 +29,13 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
     Mesh1P->SetOnlyOwnerSee(true);
     Mesh1P->SetupAttachment(FirstPersonCameraComponent);
     Mesh1P->bCastDynamicShadow = false;
+    Mesh1P->bOnlyOwnerSee = true;
+    Mesh1P->bOwnerNoSee = false;
     Mesh1P->CastShadow = false;
     Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+    GetMesh()->bOnlyOwnerSee = false;
+    GetMesh()->bOwnerNoSee = true;
 
     AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(
         TEXT("AbilitySystemComponent"));
