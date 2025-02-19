@@ -43,6 +43,10 @@ void AFlagnadoCharacter::BeginPlay() {
     Super::BeginPlay();
 }
 
+UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {
+    return AbilitySystemComponent;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 /// Input
 
