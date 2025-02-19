@@ -32,9 +32,10 @@
           config.allowUnfree = true;
         };
 
-        pwd = builtins.getEnv "PWD";
+        projectDirPath = builtins.getEnv "PWD";
         projectName = "Flagnado";
-        unrealEditorBasePath = "/mnt/storage/unreal_editors/5.4.1";
+        unrealEditorBaseDirPath = "/mnt/storage/unreal_editors/5.4.1";
+        uprojectFilePath = "${projectDirPath}/${projectName}.uproject";
       in {
         default = devenv.lib.mkShell {
           inherit inputs pkgs;
@@ -45,13 +46,27 @@
               ];
 
               scripts = {
-                de-uegen.exec = ''
-                  ${unrealEditorBasePath}/Engine/Build/BatchFiles/Linux/Build.sh \
+                ueg.exec = ''
+                  ${unrealEditorBaseDirPath}/Engine/Build/BatchFiles/Linux/Build.sh \
                   -mode=GenerateClangDatabase \
-                  -project=${pwd}/${projectName}.uproject \
+                  -project=${uprojectFilePath} \
                   -game -engine ${projectName}Editor Linux Development
 
-                  mv ${unrealEditorBasePath}/compile_commands.json ${pwd}
+                  mv ${unrealEditorBaseDirPath}/compile_commands.json ${projectDirPath}
+                '';
+
+                uehr.exec = ''
+                  randomNumber=$(echo $(( ( RANDOM % 1000 ) + 1000 )))
+
+                  ${unrealEditorBaseDirPath}/Engine/Build/BatchFiles/Linux/Build.sh \
+                  -ModuleWithSuffix=${projectName},''${randomNumber} \
+                  ${projectName}Editor \
+                  Linux Development \
+                  -Project="${uprojectFilePath}" \
+                  "${uprojectFilePath}"  \
+                  -IgnoreJunk \
+                  -progress \
+                  -waitmutex
                 '';
               };
             }
