@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "FlagnadoCharacter.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -46,7 +44,7 @@ void AFlagnadoCharacter::BeginPlay() {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-///Input
+/// Input
 
 void AFlagnadoCharacter::SetupPlayerInputComponent(
     UInputComponent *PlayerInputComponent) {

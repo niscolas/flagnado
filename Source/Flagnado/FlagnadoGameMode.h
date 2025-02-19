@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,13 +5,10 @@
 #include "FlagnadoGameMode.generated.h"
 
 UCLASS(minimalapi)
-class AFlagnadoGameMode : public AGameModeBase
-{
-	GENERATED_BODY()
+
+class AFlagnadoGameMode : public AGameModeBase {
+    GENERATED_BODY()
 
 public:
-	AFlagnadoGameMode();
+    AFlagnadoGameMode();
 };
-
-
-
