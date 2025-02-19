@@ -81,7 +81,7 @@ bool UTP_WeaponComponent::AttachWeapon(AFlagnadoCharacter *TargetCharacter) {
                       FName(TEXT("GripPoint")));
 
     // add the weapon as an instance component to the character
-    Character->AddInstanceComponent(this);
+    // Character->AddInstanceComponent(this);
 
     // Set up action bindings
     if (APlayerController *PlayerController =

@@ -4,3 +4,15 @@
     if (Condition) {                  \
         return;                       \
     }
+
+#define FLAGNADO_CONTINUE_IF(Condition) \
+    if (Condition) {                    \
+        continue;                       \
+    }
+
+#define FLAGNADO_LOG_AND_RETURN_IF(Condition, CategoryName, Verbosity, Format, \
+                                   ...)                                        \
+    if (Condition) {                                                           \
+        UE_LOG(CategoryName, Verbosity, Format, ##__VA_ARGS__);                \
+        return;                                                                \
+    }

@@ -1,4 +1,5 @@
 #include "ItemPickerComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "Flagnado/FlagnadoGameplayTags.h"
@@ -26,17 +27,22 @@ void UItemPickerComponent::BeginPlay() {
 
 void UItemPickerComponent::OnBeginOverlap(AActor *OverlappedActor,
                                           AActor *OtherActor) {
-    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || !OtherActor);
+    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent ||
+                       !GetOwner()->HasAuthority() || !OtherActor);
 
     IGameplayTagAssetInterface *OtherActorTagAssetInterface =
         Cast<IGameplayTagAssetInterface>(OtherActor);
     FLAGNADO_RETURN_IF(!OtherActorTagAssetInterface);
 
-    bool OtherActorIsPickable =
+    bool IsOtherActorPickable =
         OtherActorTagAssetInterface->HasMatchingGameplayTag(
             FlagnadoGameplayTags::Shared_Status_Pickable);
-    FLAGNADO_RETURN_IF(!OtherActorIsPickable);
+    FLAGNADO_RETURN_IF(!IsOtherActorPickable);
 
-    OwnerAbilitySystemComponent->TryActivateAbilityByClass(
-        UPickItemGameplayAbility::StaticClass());
+    FGameplayEventData EventData;
+    EventData.Instigator = GetOwner();
+    EventData.Target = OtherActor;
+
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+        GetOwner(), FlagnadoGameplayTags::Player_Event_Pickup, EventData);
 }

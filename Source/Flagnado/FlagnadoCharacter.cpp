@@ -1,4 +1,6 @@
 #include "FlagnadoCharacter.h"
+#include "AbilitiesProfileDataAsset.h"
+#include "AbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -6,8 +8,10 @@
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Flagnado/HelperMacros.h"
 #include "FlagnadoProjectile.h"
 #include "InputActionValue.h"
+#include "ItemPickerComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -27,10 +31,33 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
     Mesh1P->bCastDynamicShadow = false;
     Mesh1P->CastShadow = false;
     Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+    AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(
+        TEXT("AbilitySystemComponent"));
+
+    ItemPickerComponent = CreateDefaultSubobject<UItemPickerComponent>(
+        TEXT("ItemPickerComponent"));
 }
 
 void AFlagnadoCharacter::BeginPlay() {
     Super::BeginPlay();
+}
+
+void AFlagnadoCharacter::PossessedBy(AController *NewController) {
+    Super::PossessedBy(NewController);
+
+    AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+    FLAGNADO_LOG_AND_RETURN_IF(
+        AbilitiesProfileDataAsset.IsNull(), LogTemp, Error,
+        TEXT("Will not Load Abilities Profile, it's null"));
+    UAbilitiesProfileDataAsset *LoadedAbilitiesDataAsset =
+        AbilitiesProfileDataAsset.LoadSynchronous();
+
+    FLAGNADO_LOG_AND_RETURN_IF(!LoadedAbilitiesDataAsset, LogTemp, Error,
+                               TEXT("Will not Give All Abilities to Character, "
+                                    "didn't load Profile properly"));
+    LoadedAbilitiesDataAsset->GiveAllTo(AbilitySystemComponent);
 }
 
 UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {
