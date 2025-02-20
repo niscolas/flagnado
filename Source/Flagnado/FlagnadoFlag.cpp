@@ -13,7 +13,10 @@ AFlagnadoFlag::AFlagnadoFlag() {
 
     SphereCollider = CreateDefaultSubobject<USphereComponent>("SphereCollider");
     SphereCollider->SetupAttachment(RootComponent);
-    SphereCollider->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
+    SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    SphereCollider->SetCollisionObjectType(ECC_WorldDynamic);
+    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
+    SphereCollider->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
     GameplayTags.AddTag(FlagnadoGameplayTags::Shared_Status_Pickable);
 }
@@ -22,7 +25,6 @@ void AFlagnadoFlag::BeginPlay() {
     Super::BeginPlay();
 }
 
-void AFlagnadoFlag::GetOwnedGameplayTags(
-    FGameplayTagContainer &TagContainer) const {
+void AFlagnadoFlag::GetOwnedGameplayTags(FGameplayTagContainer &TagContainer) const {
     TagContainer = GameplayTags;
 }

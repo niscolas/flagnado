@@ -8,10 +8,11 @@
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "FlagHolderComponent.h"
 #include "Flagnado/HelperMacros.h"
+#include "FlagnadoGameplayTags.h"
 #include "FlagnadoProjectile.h"
 #include "InputActionValue.h"
-#include "ItemPickerComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -40,8 +41,8 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
     AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(
         TEXT("AbilitySystemComponent"));
 
-    ItemPickerComponent = CreateDefaultSubobject<UItemPickerComponent>(
-        TEXT("ItemPickerComponent"));
+    FlagHolderComponent = CreateDefaultSubobject<UFlagHolderComponent>(
+        TEXT("FlagHolderComponent"));
 }
 
 void AFlagnadoCharacter::BeginPlay() {

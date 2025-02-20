@@ -13,6 +13,7 @@ class FLAGNADO_API AFlagnadoPlayerState : public APlayerState {
 public:
     AFlagnadoPlayerState();
 
+    ETeam GetCurrentTeam() const;
     void SetTeam(ETeam InTeam);
 
 private:

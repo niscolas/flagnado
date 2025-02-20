@@ -5,6 +5,11 @@
         return;                       \
     }
 
+#define FLAGNADO_RETURN_VALUE_IF(Condition, ReturnValue) \
+    if (Condition) {                                     \
+        return ReturnValue;                              \
+    }
+
 #define FLAGNADO_CONTINUE_IF(Condition) \
     if (Condition) {                    \
         continue;                       \

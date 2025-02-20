@@ -12,9 +12,11 @@ class USkeletalMeshComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
-class UItemPickerComponent;
+class UFlagHolderComponent;
 class UAbilitiesProfileDataAsset;
 struct FInputActionValue;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDied);
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -59,7 +61,7 @@ private:
               BlueprintReadOnly,
               Category = "",
               meta = (AllowPrivateAccess))
-    UItemPickerComponent *ItemPickerComponent;
+    UFlagHolderComponent *FlagHolderComponent;
 
     UPROPERTY(EditAnywhere,
               BlueprintReadOnly,
@@ -84,6 +86,12 @@ private:
               Category = "Ability System",
               meta = (AllowPrivateAccess))
     TSoftObjectPtr<UAbilitiesProfileDataAsset> AbilitiesProfileDataAsset;
+
+    UPROPERTY(BlueprintCallable,
+              BlueprintAssignable,
+              Category = "State",
+              meta = (AllowPrivateAccess))
+    FDied Died;
 
     virtual void BeginPlay();
     void PossessedBy(AController *NewController) override;
