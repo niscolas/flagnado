@@ -17,12 +17,9 @@ public:
     void SetTeam(ETeam InTeam);
 
 private:
-    UPROPERTY(Replicated,
-              VisibleAnywhere,
-              BlueprintReadOnly,
-              meta = (AllowPrivateAccess))
+    UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     ETeam CurrentTeam;
 
-    virtual void GetLifetimeReplicatedProps(
-        TArray<FLifetimeProperty> &OutLifetimeProps) const override;
+    virtual void
+    GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 };

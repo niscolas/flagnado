@@ -2,11 +2,18 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/World.h"
+#include "Flagnado/FlagnadoCharacter.h"
 #include "Flagnado/FlagnadoFlag.h"
 #include "Flagnado/FlagnadoGameplayTags.h"
+#include "Flagnado/FlagnadoHelpers.h"
 #include "GameplayTagAssetInterface.h"
 #include "HelperMacros.h"
+#include "Logging/LogMacros.h"
+#include "Net/UnrealNetwork.h"
 #include "PickFlagGameplayAbility.h"
+#include "TimerManager.h"
 
 UFlagHolderComponent::UFlagHolderComponent() {
     PrimaryComponentTick.bCanEverTick = false;
@@ -29,8 +36,16 @@ void UFlagHolderComponent::OnBeginOverlap(AActor *OverlappedActor, AActor *Other
 }
 
 void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
-    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || CheckIsHoldingTheFlag() ||
-                       !PossibleFlagActor);
+    UE_LOG(LogTemp, Warning, TEXT("TryPickupFlag (%s) %s"), *PossibleFlagActor->GetName(),
+           IsPickFlagAbilityInCooldown ? TEXT("IN COOLDOWN") : TEXT("NOT IN COOLDOWN"));
+    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || !PossibleFlagActor ||
+                       IsPickFlagAbilityInCooldown);
+
+    AFlagnadoFlag *PossibleFlagActorCasted = Cast<AFlagnadoFlag>(PossibleFlagActor);
+    FLAGNADO_RETURN_IF(!PossibleFlagActorCasted);
+
+    FLAGNADO_LOG_AND_RETURN_IF(CheckIsHoldingTheFlag(), LogTemp, Warning,
+                               TEXT("Can't PickFlag while already holding it"));
 
     IGameplayTagAssetInterface *OtherActorTagAssetInterface =
         Cast<IGameplayTagAssetInterface>(PossibleFlagActor);
@@ -40,17 +55,54 @@ void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
         FlagnadoGameplayTags::Shared_Status_Pickable);
     FLAGNADO_RETURN_IF(!IsOtherActorPickable);
 
-    AFlagnadoFlag *FlagActor = Cast<AFlagnadoFlag>(PossibleFlagActor);
-    FLAGNADO_RETURN_IF(!FlagActor);
-
-    UE_LOG(LogTemp, Warning, TEXT("Picking %s"), *PossibleFlagActor->GetName());
+    FlagActor = PossibleFlagActorCasted;
 
     FGameplayEventData EventData;
     EventData.Instigator = GetOwner();
-    EventData.Target = FlagActor;
+    EventData.Target = PossibleFlagActor;
 
-    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
-        GetOwner(), FlagnadoGameplayTags::Player_Event_FlagPickup, EventData);
+    if (GetOwner()->HasAuthority()) {
+        AFlagnadoCharacter *FlagnadoCharacter = Cast<AFlagnadoCharacter>(GetOwner());
+        if (!FlagnadoCharacter) {
+            UE_LOG(LogTemp, Error, TEXT("Won't PickFlag as a non AFlagnadoCharacter"));
+            return;
+        }
+
+        USkeletalMeshComponent *SkeletalMeshComponent = FlagnadoCharacter->GetMesh();
+        PossibleFlagActor->GetRootComponent()->AttachToComponent(
+            SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale,
+            PickedFlagSocketName);
+
+        OwnerAbilitySystemComponent->AddLooseGameplayTag(
+            FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
+
+        OnFlagPickedUpSuccessfully();
+
+        Server_StartPickFlagAbilityCooldown();
+
+        // UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+        //     GetOwner(), FlagnadoGameplayTags::Player_Event_FlagPickup, EventData);
+    }
+}
+
+void UFlagHolderComponent::OnFlagPickedUpSuccessfully() {
+    FLAGNADO_RETURN_IF(!FlagActor);
+    FlagActor->OnPickedUp();
+}
+
+void UFlagHolderComponent::Server_StartPickFlagAbilityCooldown_Implementation() {
+    UE_LOG(LogTemp, Warning, TEXT("Server_StartPickFlagAbilityCooldown_Implementation"));
+
+    IsPickFlagAbilityInCooldown = true;
+
+    GetOwner()->GetWorldTimerManager().ClearTimer(PickFlagCooldownTimer);
+    GetOwner()->GetWorldTimerManager().SetTimer(PickFlagCooldownTimer, this,
+                                                &ThisClass::ResetPickFlagAbilityCooldown,
+                                                PickFlagCooldownTimeSeconds, false);
+}
+
+void UFlagHolderComponent::ResetPickFlagAbilityCooldown() {
+    IsPickFlagAbilityInCooldown = false;
 }
 
 void UFlagHolderComponent::DropFlag() {
@@ -58,25 +110,23 @@ void UFlagHolderComponent::DropFlag() {
     GetOwner()->GetAttachedActors(AttachedActors);
 
     for (AActor *AttachedActor : AttachedActors) {
-        AFlagnadoFlag *PossibleFlagActor = Cast<AFlagnadoFlag>(AttachedActor);
+        FLAGNADO_CONTINUE_IF(AttachedActor != FlagActor);
 
-        UE_LOG(LogTemp, Warning, TEXT("Trying to drop %s"), *PossibleFlagActor->GetName());
-
-        if (!PossibleFlagActor) {
-            UE_LOG(LogTemp, Warning, TEXT("Not dropping %s, it's not a Flag"),
-                   *PossibleFlagActor->GetName());
-            continue;
-        }
-
-        UE_LOG(LogTemp, Warning, TEXT("Dropping %s"), *PossibleFlagActor->GetName());
-
-        UE_LOG(LogTemp, Warning, TEXT("Is (%s) attached to (%s)? %s"),
-               *PossibleFlagActor->GetName(), *GetOwner()->GetActorNameOrLabel(),
-               PossibleFlagActor->IsAttachedTo(GetOwner()) ? TEXT("Yes") : TEXT("No"));
-
-        PossibleFlagActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        FlagActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
         OwnerAbilitySystemComponent->RemoveLooseGameplayTag(
             FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
+
+        Server_StartPickFlagAbilityCooldown();
+
+        FlagActor->OnDropped();
+        FlagActor = nullptr;
+
+        // FLAGNADO_LOG_AND_RETURN_IF(!DropFlagGameplayEffectClass, LogTemp, Error,
+        //                            TEXT("Invalid DropFlagGameplayEffectClass"));
+        // UGameplayEffect *Effect =
+        // DropFlagGameplayEffectClass->GetDefaultObject<UGameplayEffect>();
+        // OwnerAbilitySystemComponent->ApplyGameplayEffectToSelf(
+        //     Effect, 1, OwnerAbilitySystemComponent->MakeEffectContext());
     }
 }
 
@@ -87,4 +137,10 @@ bool UFlagHolderComponent::CheckIsHoldingTheFlag() const {
         FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
 
     return ReturnValue;
+}
+
+void UFlagHolderComponent::GetLifetimeReplicatedProps(
+    TArray<FLifetimeProperty> &OutLifetimeProps) const {
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UFlagHolderComponent, IsPickFlagAbilityInCooldown);
 }

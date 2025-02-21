@@ -46,8 +46,5 @@ private:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_IncrementTeamScore();
 
-    void Server_IncrementTeamScore_Implementation();
-    bool Server_IncrementTeamScore_Validate();
-
     void HandleIncrementTeamScore();
 };

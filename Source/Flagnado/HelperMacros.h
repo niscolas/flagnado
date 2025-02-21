@@ -27,3 +27,9 @@
         UE_LOG(CategoryName, Verbosity, Format, ##__VA_ARGS__);                                   \
         return ReturnValue;                                                                       \
     }
+
+#define FLAGNADO_LOG_AND_CONTINUE_IF(Condition, CategoryName, Verbosity, Format, ...) \
+    if (Condition) {                                                                  \
+        UE_LOG(CategoryName, Verbosity, Format, ##__VA_ARGS__);                       \
+        continue;                                                                     \
+    }

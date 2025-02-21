@@ -56,8 +56,6 @@ ETeam ATeamBase::GetTeam() const {
 void ATeamBase::IncrementTeamScore(AActor *PossibleTeamMember) {
     FLAGNADO_RETURN_IF(!PossibleTeamMember);
 
-    UE_LOG(LogTemp, Warning, TEXT("HEREE 4"));
-
     AFlagnadoCharacter *TeamMemberCharacter = Cast<AFlagnadoCharacter>(PossibleTeamMember);
     FLAGNADO_RETURN_IF(!TeamMemberCharacter);
 
@@ -70,12 +68,8 @@ void ATeamBase::IncrementTeamScore(AActor *PossibleTeamMember) {
         TeamMemberCharacter->GetPlayerStateChecked<AFlagnadoPlayerState>();
     FLAGNADO_RETURN_IF(!TeamMemberPlayerState);
 
-    UE_LOG(LogTemp, Warning, TEXT("HEREE 1"));
-
     ETeam MemberTeam = TeamMemberPlayerState->GetCurrentTeam();
     FLAGNADO_RETURN_IF(MemberTeam != Team);
-
-    UE_LOG(LogTemp, Warning, TEXT("HEREE 2"));
 
     if (HasAuthority()) {
         HandleIncrementTeamScore();
@@ -88,8 +82,6 @@ void ATeamBase::IncrementTeamScore(AActor *PossibleTeamMember) {
     AFlagnadoGameMode *FlagnadoGameMode =
         UFlagnadoHelpers::GetGameMode<AFlagnadoGameMode>(GetWorld());
     FLAGNADO_RETURN_IF(!FlagnadoGameMode);
-
-    UE_LOG(LogTemp, Warning, TEXT("HEREE 3"));
 
     FlagnadoGameMode->ResetFlag();
 }

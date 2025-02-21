@@ -2,10 +2,12 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "Templates/SubclassOf.h"
 #include "FlagHolderComponent.generated.h"
 
 class UAbilitySystemComponent;
 class AFlagnadoFlag;
+class UGameplayEffect;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
@@ -24,8 +26,28 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Flagnado|Flag Holder")
     void DropFlag();
 
+    void OnFlagPickedUpSuccessfully();
+
 private:
     virtual void BeginPlay() override;
+
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Category = "Flag Holder",
+              meta = (AllowPrivateAccess))
+    TSubclassOf<UGameplayEffect> DropFlagGameplayEffectClass;
+
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Category = "Flag Holder",
+              meta = (AllowPrivateAccess))
+    FName PickedFlagSocketName;
+
+    UPROPERTY(EditDefaultsOnly,
+              BlueprintReadOnly,
+              Category = "Flag Holder",
+              meta = (AllowPrivateAccess))
+    float PickFlagCooldownTimeSeconds = 1.5f;
 
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
@@ -33,6 +55,31 @@ private:
               meta = (AllowPrivateAccess))
     UAbilitySystemComponent *OwnerAbilitySystemComponent;
 
+    UPROPERTY(Replicated,
+              VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flag Holder|Debug",
+              meta = (AllowPrivateAccess))
+    bool IsPickFlagAbilityInCooldown;
+
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flag Holder|Debug",
+              meta = (AllowPrivateAccess))
+    AFlagnadoFlag *FlagActor;
+
+    UPROPERTY()
+    FTimerHandle PickFlagCooldownTimer;
+
     UFUNCTION()
     void OnBeginOverlap(AActor *OverlappedActor, AActor *OtherActor);
+
+    UFUNCTION(Server, Reliable)
+    void Server_StartPickFlagAbilityCooldown();
+
+    UFUNCTION()
+    void ResetPickFlagAbilityCooldown();
+
+    virtual void
+    GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 };
