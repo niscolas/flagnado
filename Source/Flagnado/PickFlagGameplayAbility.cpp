@@ -11,10 +11,21 @@ void UPickFlagGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle 
                                                const FGameplayAbilityActorInfo *ActorInfo,
                                                const FGameplayAbilityActivationInfo ActivationInfo,
                                                const FGameplayEventData *TriggerEventData) {
+    bool IsOnCooldown = GetAbilitySystemComponentFromActorInfo()->HasMatchingGameplayTag(
+        FlagnadoGameplayTags::Player_Cooldown_PickFlag);
+    if (IsOnCooldown) {
+        UE_LOG(LogTemp, Warning, TEXT("PickFlag is on Cooldown"));
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
+
     AFlagnadoCharacter *Character = Cast<AFlagnadoCharacter>(GetAvatarActorFromActorInfo());
-    FLAGNADO_LOG_AND_RETURN_IF(!Character, LogTemp, Error,
-                               TEXT("Will not Activate PickFlagGameplayAbility, Owner is not "
-                                    "AFlagnadoCharacter"));
+    if (!Character) {
+        UE_LOG(LogTemp, Error,
+               TEXT("Will not Activate PickFlagGameplayAbility, Owner is not AFlagnadoCharacter"));
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
 
     USkeletalMeshComponent *SkeletalMeshComponent = Character->GetMesh();
 
@@ -24,4 +35,8 @@ void UPickFlagGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle 
 
     GetAbilitySystemComponentFromActorInfo()->AddLooseGameplayTag(
         FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
+
+    ApplyCooldown(Handle, ActorInfo, ActivationInfo);
+
+    EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }

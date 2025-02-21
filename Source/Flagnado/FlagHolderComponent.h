@@ -18,7 +18,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Flagnado|Flag Holder")
     void TryPickupFlag(AActor *PossibleFlagActor);
 
+    UFUNCTION(BlueprintPure, Category = "Flagnado|Flag Holder")
     bool CheckIsHoldingTheFlag() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Flagnado|Flag Holder")
+    void DropFlag();
 
 private:
     virtual void BeginPlay() override;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Flagnado/MiscTypes.h"
 #include "GameFramework/Actor.h"
 #include "TeamBase.generated.h"
 
@@ -14,12 +15,39 @@ class FLAGNADO_API ATeamBase : public AActor {
 public:
     ATeamBase();
 
-private:
-    virtual void BeginPlay() override;
+    UFUNCTION(BlueprintPure, Category = "Flagnado|Team Base")
+    ETeam GetTeam() const;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+private:
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Team Base", meta = (AllowPrivateAccess))
+    ETeam Team;
+
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Team Base|Debug",
+              meta = (AllowPrivateAccess))
+    UStaticMeshComponent *Mesh;
+
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Team Base|Debug",
+              meta = (AllowPrivateAccess))
     USphereComponent *SphereCollider;
 
     UFUNCTION(meta = (AllowPrivateAccess))
     void OnBeginOverlap(AActor *OverlappedActor, AActor *OtherActor);
+
+    virtual void BeginPlay() override;
+
+    void UpdateMeshColor();
+
+    void IncrementTeamScore(AActor *PossibleTeamMember);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_IncrementTeamScore();
+
+    void Server_IncrementTeamScore_Implementation();
+    bool Server_IncrementTeamScore_Validate();
+
+    void HandleIncrementTeamScore();
 };

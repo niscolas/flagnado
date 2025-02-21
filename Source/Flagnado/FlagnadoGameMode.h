@@ -6,6 +6,7 @@
 #include "MiscTypes.h"
 #include "FlagnadoGameMode.generated.h"
 
+class AFlagSpawnPoint;
 class AFlagnadoFlag;
 
 UCLASS(minimalapi)
@@ -32,17 +33,11 @@ private:
               meta = (AllowPrivateAccess))
     TSubclassOf<AFlagnadoFlag> FlagClass;
 
-    UPROPERTY(EditDefaultsOnly,
-              BlueprintReadOnly,
-              Category = "Game|Settings|Teams",
-              meta = (AllowPrivateAccess))
-    TMap<ETeam, UMaterialInterface *> TeamMemberMaterials;
-
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
               Category = "Game|Debug",
               meta = (AllowPrivateAccess))
-    int32 TeamCounter = 0;
+    int32 CurrentPlayerIndex = 0;
 
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
@@ -50,7 +45,19 @@ private:
               meta = (AllowPrivateAccess))
     AFlagnadoFlag *FlagActor;
 
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Game|Debug",
+              meta = (AllowPrivateAccess))
+    TArray<ETeam> ExistingTeams;
+
+    bool HasFetchedExistingTeams;
+
     virtual void BeginPlay() override;
 
+    void FetchExistingTeams();
     void SpawnFlag();
+
+    UFUNCTION(BlueprintPure, meta = (AllowPrivateAccess))
+    AFlagSpawnPoint *GetFlagSpawnPoint() const;
 };

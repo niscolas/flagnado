@@ -15,20 +15,21 @@ public:
 
     void AddTeamOrIncrementTeamScore(ETeam InTeam);
     int32 GetTeamScore(ETeam InTeam) const;
+    UMaterialInterface *GetMaterialForTeam(ETeam InTeam) const;
 
 private:
-    UPROPERTY(Replicated,
-              VisibleAnywhere,
-              BlueprintReadOnly,
-              meta = (AllowPrivateAccess))
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    TArray<ETeam> TeamMaterialsKeys;
+
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    TArray<UMaterialInterface *> TeamMaterialsValues;
+
+    UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     TArray<ETeam> TeamScoresKeys;
 
-    UPROPERTY(Replicated,
-              VisibleAnywhere,
-              BlueprintReadOnly,
-              meta = (AllowPrivateAccess))
+    UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     TArray<int32> TeamScoresValues;
 
-    virtual void GetLifetimeReplicatedProps(
-        TArray<FLifetimeProperty> &OutLifetimeProps) const override;
+    virtual void
+    GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 };

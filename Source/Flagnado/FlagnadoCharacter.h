@@ -2,6 +2,8 @@
 
 #include "AbilitySystemInterface.h"
 #include "CoreMinimal.h"
+#include "Engine/TimerHandle.h"
+#include "Flagnado/MiscTypes.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "FlagnadoCharacter.generated.h"
@@ -38,6 +40,9 @@ public:
         return FirstPersonCameraComponent;
     }
 
+    void OnTeamAssigned(ETeam InTeam);
+    bool TryGetAssignedTeam(ETeam &OutTeam) const;
+
 private:
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
@@ -57,10 +62,7 @@ private:
               meta = (AllowPrivateAccess))
     UAbilitySystemComponent *AbilitySystemComponent;
 
-    UPROPERTY(VisibleAnywhere,
-              BlueprintReadOnly,
-              Category = "",
-              meta = (AllowPrivateAccess))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess))
     UFlagHolderComponent *FlagHolderComponent;
 
     UPROPERTY(EditAnywhere,
@@ -93,13 +95,21 @@ private:
               meta = (AllowPrivateAccess))
     FDied Died;
 
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flagnado Character|Debug",
+              meta = (AllowPrivateAccess))
+    bool HasUpdatedMeshesProperly;
+
     virtual void BeginPlay();
-    void PossessedBy(AController *NewController) override;
+    virtual void PossessedBy(AController *NewController) override;
+    virtual void OnRep_PlayerState() override;
+    virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 
+    void UpdateMeshesColorsOnce();
+    void SetupAbilitySystemComponent();
     void Move(const FInputActionValue &Value);
-
     void Look(const FInputActionValue &Value);
 
-    virtual void
-    SetupPlayerInputComponent(UInputComponent *InputComponent) override;
+    FTimerHandle TimerHandle;
 };

@@ -29,7 +29,8 @@ void UFlagHolderComponent::OnBeginOverlap(AActor *OverlappedActor, AActor *Other
 }
 
 void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
-    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || !PossibleFlagActor);
+    FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || CheckIsHoldingTheFlag() ||
+                       !PossibleFlagActor);
 
     IGameplayTagAssetInterface *OtherActorTagAssetInterface =
         Cast<IGameplayTagAssetInterface>(PossibleFlagActor);
@@ -42,12 +43,41 @@ void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
     AFlagnadoFlag *FlagActor = Cast<AFlagnadoFlag>(PossibleFlagActor);
     FLAGNADO_RETURN_IF(!FlagActor);
 
+    UE_LOG(LogTemp, Warning, TEXT("Picking %s"), *PossibleFlagActor->GetName());
+
     FGameplayEventData EventData;
     EventData.Instigator = GetOwner();
     EventData.Target = FlagActor;
 
     UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
         GetOwner(), FlagnadoGameplayTags::Player_Event_FlagPickup, EventData);
+}
+
+void UFlagHolderComponent::DropFlag() {
+    TArray<AActor *> AttachedActors;
+    GetOwner()->GetAttachedActors(AttachedActors);
+
+    for (AActor *AttachedActor : AttachedActors) {
+        AFlagnadoFlag *PossibleFlagActor = Cast<AFlagnadoFlag>(AttachedActor);
+
+        UE_LOG(LogTemp, Warning, TEXT("Trying to drop %s"), *PossibleFlagActor->GetName());
+
+        if (!PossibleFlagActor) {
+            UE_LOG(LogTemp, Warning, TEXT("Not dropping %s, it's not a Flag"),
+                   *PossibleFlagActor->GetName());
+            continue;
+        }
+
+        UE_LOG(LogTemp, Warning, TEXT("Dropping %s"), *PossibleFlagActor->GetName());
+
+        UE_LOG(LogTemp, Warning, TEXT("Is (%s) attached to (%s)? %s"),
+               *PossibleFlagActor->GetName(), *GetOwner()->GetActorNameOrLabel(),
+               PossibleFlagActor->IsAttachedTo(GetOwner()) ? TEXT("Yes") : TEXT("No"));
+
+        PossibleFlagActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        OwnerAbilitySystemComponent->RemoveLooseGameplayTag(
+            FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
+    }
 }
 
 bool UFlagHolderComponent::CheckIsHoldingTheFlag() const {

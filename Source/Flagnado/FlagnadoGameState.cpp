@@ -28,3 +28,13 @@ int32 AFlagnadoGameState::GetTeamScore(ETeam InTeam) const {
         return TeamScoresValues[TeamIndex];
     }
 }
+
+UMaterialInterface *AFlagnadoGameState::GetMaterialForTeam(ETeam InTeam) const {
+    int32 TeamIndex = TeamMaterialsKeys.Find(InTeam);
+
+    if (TeamIndex == INDEX_NONE) {
+        return nullptr;
+    } else {
+        return TeamMaterialsValues[TeamIndex];
+    }
+}
