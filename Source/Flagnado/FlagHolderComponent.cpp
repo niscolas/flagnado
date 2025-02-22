@@ -79,9 +79,6 @@ void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
         OnFlagPickedUpSuccessfully();
 
         Server_StartPickFlagAbilityCooldown();
-
-        // UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
-        //     GetOwner(), FlagnadoGameplayTags::Player_Event_FlagPickup, EventData);
     }
 }
 
@@ -120,13 +117,6 @@ void UFlagHolderComponent::DropFlag() {
 
         FlagActor->OnDropped();
         FlagActor = nullptr;
-
-        // FLAGNADO_LOG_AND_RETURN_IF(!DropFlagGameplayEffectClass, LogTemp, Error,
-        //                            TEXT("Invalid DropFlagGameplayEffectClass"));
-        // UGameplayEffect *Effect =
-        // DropFlagGameplayEffectClass->GetDefaultObject<UGameplayEffect>();
-        // OwnerAbilitySystemComponent->ApplyGameplayEffectToSelf(
-        //     Effect, 1, OwnerAbilitySystemComponent->MakeEffectContext());
     }
 }
 

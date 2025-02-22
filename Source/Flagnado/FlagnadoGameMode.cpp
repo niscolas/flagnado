@@ -2,6 +2,7 @@
 #include "Engine/World.h"
 #include "Flagnado/Flag/FlagSpawnPoint.h"
 #include "Flagnado/FlagnadoFlag.h"
+#include "Flagnado/FlagnadoHelpers.h"
 #include "Flagnado/TeamBase.h"
 #include "FlagnadoCharacter.h"
 #include "FlagnadoGameState.h"
@@ -27,6 +28,9 @@ void AFlagnadoGameMode::BeginPlay() {
 void AFlagnadoGameMode::PostLogin(APlayerController *NewPlayer) {
     Super::PostLogin(NewPlayer);
 
+    UE_LOG(LogTemp, Warning, TEXT("(%s) PostLogin"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
+
     AFlagnadoPlayerState *FlagnadoPlayerState = NewPlayer->GetPlayerState<AFlagnadoPlayerState>();
     FLAGNADO_LOG_AND_RETURN_IF(!FlagnadoPlayerState, LogTemp, Error,
                                TEXT("Invalid PlayerState class"));
@@ -44,12 +48,6 @@ void AFlagnadoGameMode::PostLogin(APlayerController *NewPlayer) {
     CurrentPlayerIndex++;
 
     FlagnadoPlayerState->SetTeam(AssignedTeam);
-
-    AFlagnadoCharacter *FlagnadoCharacter = Cast<AFlagnadoCharacter>(NewPlayer->GetPawn());
-    FLAGNADO_LOG_AND_RETURN_IF(!FlagnadoCharacter, LogTemp, Error,
-                               TEXT("Invalid Character class for %s"), *NewPlayer->GetName());
-
-    FlagnadoCharacter->OnTeamAssigned(AssignedTeam);
 }
 
 void AFlagnadoGameMode::FetchExistingTeams() {

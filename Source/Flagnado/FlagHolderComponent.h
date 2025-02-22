@@ -7,7 +7,6 @@
 
 class UAbilitySystemComponent;
 class AFlagnadoFlag;
-class UGameplayEffect;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
@@ -30,12 +29,6 @@ public:
 
 private:
     virtual void BeginPlay() override;
-
-    UPROPERTY(EditDefaultsOnly,
-              BlueprintReadOnly,
-              Category = "Flag Holder",
-              meta = (AllowPrivateAccess))
-    TSubclassOf<UGameplayEffect> DropFlagGameplayEffectClass;
 
     UPROPERTY(EditDefaultsOnly,
               BlueprintReadOnly,

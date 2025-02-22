@@ -40,7 +40,6 @@ public:
         return FirstPersonCameraComponent;
     }
 
-    void OnTeamAssigned(ETeam InTeam);
     bool TryGetAssignedTeam(ETeam &OutTeam) const;
 
 private:
@@ -83,6 +82,12 @@ private:
               meta = (AllowPrivateAccess = "true"))
     class UInputAction *LookAction;
 
+    UPROPERTY(EditAnywhere,
+              BlueprintReadOnly,
+              Category = Input,
+              meta = (AllowPrivateAccess = "true"))
+    UInputAction *TestAction;
+
     UPROPERTY(EditDefaultsOnly,
               BlueprintReadOnly,
               Category = "Ability System",
@@ -106,10 +111,20 @@ private:
     virtual void OnRep_PlayerState() override;
     virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 
-    void UpdateMeshesColorsOnce();
+    UFUNCTION(Server, Reliable)
+    void Server_UpdateMeshesColorsOnce();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_UpdateMeshesColorsOnce();
+
+    UFUNCTION()
+    void HandleUpdateMeshesColors();
+
     void SetupAbilitySystemComponent();
+    void Test(const FInputActionValue &Value);
     void Move(const FInputActionValue &Value);
     void Look(const FInputActionValue &Value);
 
+    UPROPERTY()
     FTimerHandle TimerHandle;
 };

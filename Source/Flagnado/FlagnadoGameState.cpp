@@ -1,4 +1,5 @@
 #include "FlagnadoGameState.h"
+#include "Net/UnrealNetwork.h"
 
 AFlagnadoGameState::AFlagnadoGameState() {
 }
@@ -6,6 +7,10 @@ AFlagnadoGameState::AFlagnadoGameState() {
 void AFlagnadoGameState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AFlagnadoGameState, TeamMaterialsKeys);
+    DOREPLIFETIME(AFlagnadoGameState, TeamMaterialsValues);
+    DOREPLIFETIME(AFlagnadoGameState, TeamScoresKeys);
+    DOREPLIFETIME(AFlagnadoGameState, TeamScoresValues);
 }
 
 void AFlagnadoGameState::AddTeamOrIncrementTeamScore(ETeam InTeam) {

@@ -1,6 +1,7 @@
 #include "FlagnadoPlayerState.h"
 #include "HelperMacros.h"
 #include "MiscTypes.h"
+#include "Net/UnrealNetwork.h"
 
 AFlagnadoPlayerState::AFlagnadoPlayerState() {
     CurrentTeam = ETeam::None;
@@ -19,4 +20,5 @@ void AFlagnadoPlayerState::SetTeam(ETeam InTeam) {
 void AFlagnadoPlayerState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AFlagnadoPlayerState, CurrentTeam);
 }
