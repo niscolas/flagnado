@@ -82,12 +82,6 @@ private:
               meta = (AllowPrivateAccess = "true"))
     class UInputAction *LookAction;
 
-    UPROPERTY(EditAnywhere,
-              BlueprintReadOnly,
-              Category = Input,
-              meta = (AllowPrivateAccess = "true"))
-    UInputAction *TestAction;
-
     UPROPERTY(EditDefaultsOnly,
               BlueprintReadOnly,
               Category = "Ability System",
@@ -121,7 +115,6 @@ private:
     void HandleUpdateMeshesColors();
 
     void SetupAbilitySystemComponent();
-    void Test(const FInputActionValue &Value);
     void Move(const FInputActionValue &Value);
     void Look(const FInputActionValue &Value);
 

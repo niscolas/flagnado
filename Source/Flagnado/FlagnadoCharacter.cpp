@@ -54,27 +54,18 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
 
 void AFlagnadoCharacter::BeginPlay() {
     Super::BeginPlay();
-
-    UE_LOG(LogTemp, Warning, TEXT("(%s | %s) BeginPlay"), *GetName(),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
-
-    // if (HasAuthority()) {
-    //     GetWorldTimerManager().SetTimer(TimerHandle, this,
-    //                                     &ThisClass::Multicast_UpdateMeshesColorsOnce, 10.f,
-    //                                     false);
-    // }
 }
 
 void AFlagnadoCharacter::PossessedBy(AController *NewController) {
     Super::PossessedBy(NewController);
 
     SetupAbilitySystemComponent();
-    UE_LOG(LogTemp, Warning, TEXT("(%s) PossessedBy"), *GetName());
+    GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
+                                    2.f, false);
 }
 
 void AFlagnadoCharacter::OnRep_PlayerState() {
     Super::OnRep_PlayerState();
-    // Multicast_UpdateMeshesColorsOnce();
 }
 
 UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {
@@ -92,9 +83,6 @@ void AFlagnadoCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputC
                                            &AFlagnadoCharacter::Move);
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this,
                                            &AFlagnadoCharacter::Look);
-
-        EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this,
-                                           &ThisClass::Test);
     } else {
         UE_LOG(LogTemplateCharacter, Error,
                TEXT("'%s' Failed to find an Enhanced Input Component! This "
@@ -133,10 +121,8 @@ void AFlagnadoCharacter::Server_UpdateMeshesColorsOnce_Implementation() {
 }
 
 void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
-    // FLAGNADO_RETURN_IF(HasUpdatedMeshesProperly);
+    FLAGNADO_RETURN_IF(HasUpdatedMeshesProperly);
 
-    UE_LOG(LogTemp, Warning, TEXT("[%s] HandleUpdateMeshesColors (%s)"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *GetName());
     AFlagnadoGameState *FlagnadoGameState = GetWorld()->GetGameState<AFlagnadoGameState>();
     FLAGNADO_LOG_AND_RETURN_IF(!FlagnadoGameState, LogTemp, Error,
                                TEXT("(%s) Couldn't load GameState"), *GetActorNameOrLabel());
@@ -145,22 +131,13 @@ void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
     FLAGNADO_LOG_AND_RETURN_IF(!TryGetAssignedTeam(CurrentTeam), LogTemp, Error,
                                TEXT("(%s) No team assigned"), *GetActorNameOrLabel());
 
-    UE_LOG(LogTemp, Warning, TEXT("[%s] HandleUpdateMeshesColors Team (%s) (%s)"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *UEnum::GetValueAsString(CurrentTeam),
-           *GetName());
-
     UMaterialInterface *TeamMaterial = FlagnadoGameState->GetMaterialForTeam(CurrentTeam);
     FLAGNADO_LOG_AND_RETURN_IF(!TeamMaterial, LogTemp, Error,
                                TEXT("(%s) Couldn't find Team Material"), *GetActorNameOrLabel());
 
-    UE_LOG(LogTemp, Warning, TEXT("[%s] HandleUpdateMeshesColors Material (%s) (%s)"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *TeamMaterial->GetName(), *GetName());
-
     GetMesh()->SetMaterial(0, TeamMaterial);
     GetMesh1P()->SetMaterial(0, TeamMaterial);
 
-    UE_LOG(LogTemp, Warning, TEXT("[%s] Final HandleUpdateMeshesColors (%s)"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *GetName());
     HasUpdatedMeshesProperly = true;
 }
 
@@ -183,10 +160,4 @@ void AFlagnadoCharacter::Look(const FInputActionValue &Value) {
         AddControllerYawInput(LookAxisVector.X);
         AddControllerPitchInput(LookAxisVector.Y);
     }
-}
-
-void AFlagnadoCharacter::Test(const FInputActionValue &Value) {
-    UE_LOG(LogTemp, Warning, TEXT("(%s) Test Action"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
-    Server_UpdateMeshesColorsOnce();
 }

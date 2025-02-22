@@ -36,8 +36,6 @@ void UFlagHolderComponent::OnBeginOverlap(AActor *OverlappedActor, AActor *Other
 }
 
 void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
-    UE_LOG(LogTemp, Warning, TEXT("TryPickupFlag (%s) %s"), *PossibleFlagActor->GetName(),
-           IsPickFlagAbilityInCooldown ? TEXT("IN COOLDOWN") : TEXT("NOT IN COOLDOWN"));
     FLAGNADO_RETURN_IF(!OwnerAbilitySystemComponent || !PossibleFlagActor ||
                        IsPickFlagAbilityInCooldown);
 
@@ -57,29 +55,23 @@ void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
 
     FlagActor = PossibleFlagActorCasted;
 
-    FGameplayEventData EventData;
-    EventData.Instigator = GetOwner();
-    EventData.Target = PossibleFlagActor;
+    FLAGNADO_RETURN_IF(!GetOwner()->HasAuthority());
 
-    if (GetOwner()->HasAuthority()) {
-        AFlagnadoCharacter *FlagnadoCharacter = Cast<AFlagnadoCharacter>(GetOwner());
-        if (!FlagnadoCharacter) {
-            UE_LOG(LogTemp, Error, TEXT("Won't PickFlag as a non AFlagnadoCharacter"));
-            return;
-        }
+    AFlagnadoCharacter *FlagnadoCharacter = Cast<AFlagnadoCharacter>(GetOwner());
+    FLAGNADO_LOG_AND_RETURN_IF(!FlagnadoCharacter, LogTemp, Error,
+                               TEXT("Won't PickFlag as a non AFlagnadoCharacter"));
 
-        USkeletalMeshComponent *SkeletalMeshComponent = FlagnadoCharacter->GetMesh();
-        PossibleFlagActor->GetRootComponent()->AttachToComponent(
-            SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale,
-            PickedFlagSocketName);
+    USkeletalMeshComponent *SkeletalMeshComponent = FlagnadoCharacter->GetMesh();
+    PossibleFlagActor->GetRootComponent()->AttachToComponent(
+        SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale,
+        PickedFlagSocketName);
 
-        OwnerAbilitySystemComponent->AddLooseGameplayTag(
-            FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
+    OwnerAbilitySystemComponent->AddLooseGameplayTag(
+        FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
 
-        OnFlagPickedUpSuccessfully();
+    OnFlagPickedUpSuccessfully();
 
-        Server_StartPickFlagAbilityCooldown();
-    }
+    Server_StartPickFlagAbilityCooldown();
 }
 
 void UFlagHolderComponent::OnFlagPickedUpSuccessfully() {
@@ -88,8 +80,6 @@ void UFlagHolderComponent::OnFlagPickedUpSuccessfully() {
 }
 
 void UFlagHolderComponent::Server_StartPickFlagAbilityCooldown_Implementation() {
-    UE_LOG(LogTemp, Warning, TEXT("Server_StartPickFlagAbilityCooldown_Implementation"));
-
     IsPickFlagAbilityInCooldown = true;
 
     GetOwner()->GetWorldTimerManager().ClearTimer(PickFlagCooldownTimer);
