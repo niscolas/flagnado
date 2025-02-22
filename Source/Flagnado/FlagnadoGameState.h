@@ -5,6 +5,11 @@
 #include "MiscTypes.h"
 #include "FlagnadoGameState.generated.h"
 
+class UTeamsColorProfileDataAsset;
+
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnyTeamDataChanged);
+
 UCLASS()
 
 class FLAGNADO_API AFlagnadoGameState : public AGameState {
@@ -13,15 +18,38 @@ class FLAGNADO_API AFlagnadoGameState : public AGameState {
 public:
     AFlagnadoGameState();
 
+    UFUNCTION(BlueprintPure, Category = "Flagnado|Game State")
+
+    TArray<UTeamData *> GetTeamsData() const;
+
     void AddTeamOrIncrementTeamScore(ETeam InTeam);
     int32 GetTeamScore(ETeam InTeam) const;
 
 private:
-    UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    UTeamsColorProfileDataAsset *TeamsColorProfileDataAsset;
+
+    UPROPERTY(Replicated,
+              VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flagnado Game State|Debug",
+              meta = (AllowPrivateAccess))
     TArray<ETeam> TeamScoresKeys;
 
-    UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    UPROPERTY(ReplicatedUsing = OnRep_TeamScoresValues,
+              VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flagnado Game State|Debug",
+              meta = (AllowPrivateAccess))
     TArray<int32> TeamScoresValues;
+
+    UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess))
+    FAnyTeamDataChanged AnyTeamDataChanged;
+
+    UFUNCTION()
+    void OnRep_TeamScoresValues();
+
+    void BroadcastAnyTeamDataChanged();
 
     virtual void
     GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
