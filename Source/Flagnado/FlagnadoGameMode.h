@@ -3,11 +3,14 @@
 #include "CoreMinimal.h"
 #include "Engine/EngineTypes.h"
 #include "GameFramework/GameMode.h"
+#include "Math/Color.h"
 #include "MiscTypes.h"
 #include "FlagnadoGameMode.generated.h"
 
 class AFlagSpawnPoint;
 class AFlagnadoFlag;
+
+class UMaterialInterface;
 
 UCLASS(minimalapi)
 

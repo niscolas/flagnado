@@ -17,6 +17,7 @@ class UInputMappingContext;
 class UFlagHolderComponent;
 class UAbilitiesProfileDataAsset;
 struct FInputActionValue;
+class UTeamsColorProfileDataAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDied);
 
@@ -93,6 +94,9 @@ private:
               Category = "State",
               meta = (AllowPrivateAccess))
     FDied Died;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    UTeamsColorProfileDataAsset *TeamsColorProfileDataAsset;
 
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,

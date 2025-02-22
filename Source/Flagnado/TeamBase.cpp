@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "HelperMacros.h"
 #include "Kismet/GameplayStatics.h"
+#include "TeamsColorProfileDataAsset.h"
 #include "Templates/Casts.h"
 
 ATeamBase::ATeamBase() {
@@ -36,10 +37,9 @@ void ATeamBase::BeginPlay() {
 }
 
 void ATeamBase::UpdateMeshColor() {
-    AFlagnadoGameState *FlagnadoGameState = GetWorld()->GetGameState<AFlagnadoGameState>();
-    FLAGNADO_RETURN_IF(!FlagnadoGameState);
+    FLAGNADO_RETURN_IF(!TeamsColorProfileDataAsset);
 
-    UMaterialInterface *TeamMaterial = FlagnadoGameState->GetMaterialForTeam(Team);
+    UMaterialInterface *TeamMaterial = TeamsColorProfileDataAsset->GetMaterialForTeam(Team);
     FLAGNADO_RETURN_IF(!TeamMaterial);
 
     Mesh->SetMaterial(0, TeamMaterial);

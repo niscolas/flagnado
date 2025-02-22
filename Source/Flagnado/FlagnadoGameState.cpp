@@ -7,8 +7,6 @@ AFlagnadoGameState::AFlagnadoGameState() {
 void AFlagnadoGameState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(AFlagnadoGameState, TeamMaterialsKeys);
-    DOREPLIFETIME(AFlagnadoGameState, TeamMaterialsValues);
     DOREPLIFETIME(AFlagnadoGameState, TeamScoresKeys);
     DOREPLIFETIME(AFlagnadoGameState, TeamScoresValues);
 }
@@ -31,15 +29,5 @@ int32 AFlagnadoGameState::GetTeamScore(ETeam InTeam) const {
         return 0;
     } else {
         return TeamScoresValues[TeamIndex];
-    }
-}
-
-UMaterialInterface *AFlagnadoGameState::GetMaterialForTeam(ETeam InTeam) const {
-    int32 TeamIndex = TeamMaterialsKeys.Find(InTeam);
-
-    if (TeamIndex == INDEX_NONE) {
-        return nullptr;
-    } else {
-        return TeamMaterialsValues[TeamIndex];
     }
 }

@@ -21,6 +21,7 @@
 #include "FlagnadoProjectile.h"
 #include "InputActionValue.h"
 #include "Logging/LogMacros.h"
+#include "TeamsColorProfileDataAsset.h"
 #include "TimerManager.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -122,16 +123,15 @@ void AFlagnadoCharacter::Server_UpdateMeshesColorsOnce_Implementation() {
 
 void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
     FLAGNADO_RETURN_IF(HasUpdatedMeshesProperly);
-
-    AFlagnadoGameState *FlagnadoGameState = GetWorld()->GetGameState<AFlagnadoGameState>();
-    FLAGNADO_LOG_AND_RETURN_IF(!FlagnadoGameState, LogTemp, Error,
-                               TEXT("(%s) Couldn't load GameState"), *GetActorNameOrLabel());
+    FLAGNADO_LOG_AND_RETURN_IF(!TeamsColorProfileDataAsset, LogTemp, Error,
+                               TEXT("(%s) Invalid TeamsColorProfileDataAsset"),
+                               *GetActorNameOrLabel());
 
     ETeam CurrentTeam;
     FLAGNADO_LOG_AND_RETURN_IF(!TryGetAssignedTeam(CurrentTeam), LogTemp, Error,
                                TEXT("(%s) No team assigned"), *GetActorNameOrLabel());
 
-    UMaterialInterface *TeamMaterial = FlagnadoGameState->GetMaterialForTeam(CurrentTeam);
+    UMaterialInterface *TeamMaterial = TeamsColorProfileDataAsset->GetMaterialForTeam(CurrentTeam);
     FLAGNADO_LOG_AND_RETURN_IF(!TeamMaterial, LogTemp, Error,
                                TEXT("(%s) Couldn't find Team Material"), *GetActorNameOrLabel());
 

@@ -15,15 +15,8 @@ public:
 
     void AddTeamOrIncrementTeamScore(ETeam InTeam);
     int32 GetTeamScore(ETeam InTeam) const;
-    UMaterialInterface *GetMaterialForTeam(ETeam InTeam) const;
 
 private:
-    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-    TArray<ETeam> TeamMaterialsKeys;
-
-    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-    TArray<UMaterialInterface *> TeamMaterialsValues;
-
     UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     TArray<ETeam> TeamScoresKeys;
 

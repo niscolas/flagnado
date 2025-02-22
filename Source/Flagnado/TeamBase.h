@@ -6,6 +6,7 @@
 #include "TeamBase.generated.h"
 
 class USphereComponent;
+class UTeamsColorProfileDataAsset;
 
 UCLASS()
 
@@ -19,8 +20,11 @@ public:
     ETeam GetTeam() const;
 
 private:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Team Base", meta = (AllowPrivateAccess))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     ETeam Team;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    UTeamsColorProfileDataAsset *TeamsColorProfileDataAsset;
 
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
