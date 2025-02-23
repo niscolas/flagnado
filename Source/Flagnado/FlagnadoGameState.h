@@ -22,7 +22,7 @@ public:
     UFUNCTION(BlueprintPure, Category = "Flagnado|Game State")
     TArray<UTeamData *> GetTeamsData() const;
 
-    void Setup(int32 InNumFlagsToWin);
+    void Setup(int32 InNumFlagsToWin, TArray<ETeam> ExistingTeams);
 
     void AddTeamOrIncrementTeamScore(ETeam InTeam);
     int32 GetTeamScore(ETeam InTeam) const;
@@ -58,6 +58,7 @@ private:
     UFUNCTION()
     void OnRep_TeamScoresValues();
 
+    void SetupInitialTeamsScores(TArray<ETeam> ExistingTeams);
     void BroadcastAnyTeamDataChanged();
 
     virtual void

@@ -46,7 +46,9 @@ void AFlagnadoGameMode::PostLogin(APlayerController *NewPlayer) {
     FlagnadoPlayerState->SetTeam(AssignedTeam);
 
     ATeamMemberSpawnPoint *SpawnPoint = GetRandomTeamMemberSpawnPointForTeam(AssignedTeam);
-    FLAGNADO_RETURN_IF(!SpawnPoint);
+    FLAGNADO_LOG_AND_RETURN_IF(!SpawnPoint, LogTemp, Error,
+                               TEXT("Couldn't find SpawnPoint for Team %s"),
+                               *UEnum::GetValueAsString(AssignedTeam));
 
     GetWorld()->GetTimerManager().SetTimerForNextTick([this, SpawnPoint, NewPlayer]() {
         FVector SpawnLocation = SpawnPoint->GetSpawnLocation();
@@ -66,7 +68,7 @@ void AFlagnadoGameMode::SetupGameState() {
     AFlagnadoGameState *GameState = GetGameState<AFlagnadoGameState>();
     FLAGNADO_LOG_AND_RETURN_IF(!GameState, LogTemp, Error, TEXT("GameState is invalid"));
 
-    GameState->Setup(NumFlagsToWin);
+    GameState->Setup(NumFlagsToWin, ExistingTeams);
 }
 
 void AFlagnadoGameMode::ReloadGame() {
