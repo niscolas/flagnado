@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
 #include "MiscTypes.h"
+#include "UObject/ObjectMacros.h"
 #include "FlagnadoGameState.generated.h"
 
 class UTeamsColorProfileDataAsset;
@@ -19,8 +20,9 @@ public:
     AFlagnadoGameState();
 
     UFUNCTION(BlueprintPure, Category = "Flagnado|Game State")
-
     TArray<UTeamData *> GetTeamsData() const;
+
+    void Setup(int32 InNumFlagsToWin);
 
     void AddTeamOrIncrementTeamScore(ETeam InTeam);
     int32 GetTeamScore(ETeam InTeam) const;
@@ -28,6 +30,13 @@ public:
 private:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
     UTeamsColorProfileDataAsset *TeamsColorProfileDataAsset;
+
+    UPROPERTY(Replicated,
+              VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Flagnado Game State|Debug",
+              meta = (AllowPrivateAccess))
+    int32 NumFlagsToWin;
 
     UPROPERTY(Replicated,
               VisibleAnywhere,

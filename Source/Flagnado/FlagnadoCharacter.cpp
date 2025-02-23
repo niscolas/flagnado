@@ -62,7 +62,7 @@ void AFlagnadoCharacter::PossessedBy(AController *NewController) {
 
     SetupAbilitySystemComponent();
     GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
-                                    2.f, false);
+                                    10.f, false);
 }
 
 void AFlagnadoCharacter::OnRep_PlayerState() {

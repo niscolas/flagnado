@@ -1,7 +1,10 @@
 #include "FlagnadoGameState.h"
+#include "Flagnado/FlagnadoGameMode.h"
 #include "Flagnado/FlagnadoHelpers.h"
 #include "Flagnado/HelperMacros.h"
+#include "GameFramework/PlayerController.h"
 #include "HelperMacros.h"
+#include "Kismet/GameplayStatics.h"
 #include "MiscTypes.h"
 #include "Net/UnrealNetwork.h"
 #include "TeamsColorProfileDataAsset.h"
@@ -14,6 +17,11 @@ void AFlagnadoGameState::GetLifetimeReplicatedProps(
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AFlagnadoGameState, TeamScoresKeys);
     DOREPLIFETIME(AFlagnadoGameState, TeamScoresValues);
+    DOREPLIFETIME(AFlagnadoGameState, NumFlagsToWin);
+}
+
+void AFlagnadoGameState::Setup(int32 InNumFlagsToWin) {
+    NumFlagsToWin = InNumFlagsToWin;
 }
 
 void AFlagnadoGameState::AddTeamOrIncrementTeamScore(ETeam InTeam) {
@@ -22,12 +30,21 @@ void AFlagnadoGameState::AddTeamOrIncrementTeamScore(ETeam InTeam) {
     if (TeamIndex == INDEX_NONE) {
         TeamScoresKeys.Add(InTeam);
         TeamScoresValues.Add(1);
-
     } else {
         TeamScoresValues[TeamIndex]++;
     }
 
     if (HasAuthority()) {
+        int32 ProperTeamIndex = TeamScoresKeys.Find(InTeam);
+
+        if (TeamScoresValues[ProperTeamIndex] >= NumFlagsToWin) {
+            for (int16 i = 0; i < TeamScoresKeys.Num(); i++) {
+                TeamScoresValues[i] = 0;
+            }
+
+            GetWorld()->GetAuthGameMode<AFlagnadoGameMode>()->ReloadGame();
+        }
+
         BroadcastAnyTeamDataChanged();
     }
 }
@@ -60,7 +77,7 @@ TArray<UTeamData *> AFlagnadoGameState::GetTeamsData() const {
         }
 
         TeamData->CurrentScore = TeamScoresValues[i];
-        TeamData->TargetScore = 3;
+        TeamData->TargetScore = NumFlagsToWin;
         Result.Add(TeamData);
 
         UE_LOG(LogTemp, Warning, TEXT("(%s) Team: %s, %d, %d"),

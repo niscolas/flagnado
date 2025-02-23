@@ -9,8 +9,21 @@
 
 class AFlagSpawnPoint;
 class AFlagnadoFlag;
-
+class ATeamMemberSpawnPoint;
+class APlayerController;
 class UMaterialInterface;
+
+USTRUCT(BlueprintType)
+
+struct FTeamMemberSpawnPointArray {
+    GENERATED_BODY()
+
+public:
+    FTeamMemberSpawnPointArray() = default;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    TArray<ATeamMemberSpawnPoint *> Content;
+};
 
 UCLASS(minimalapi)
 
@@ -22,6 +35,9 @@ public:
 
     void PostLogin(APlayerController *NewPlayer) override;
     void ResetFlag();
+
+    UFUNCTION()
+    void ReloadGame();
 
 private:
     UPROPERTY(EditDefaultsOnly,
@@ -54,12 +70,26 @@ private:
               meta = (AllowPrivateAccess))
     TArray<ETeam> ExistingTeams;
 
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Game|Debug",
+              meta = (AllowPrivateAccess))
+    TMap<ETeam, FTeamMemberSpawnPointArray> AllTeamMemberSpawnPointsMap;
+
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Game|Debug",
+              meta = (AllowPrivateAccess))
+    TMap<APlayerController *, ATeamMemberSpawnPoint *> PlayersSpawnPoints;
+
     bool HasFetchedExistingTeams;
 
     virtual void BeginPlay() override;
 
+    void SetupGameState();
     void FetchExistingTeams();
     void SpawnFlag();
+    ATeamMemberSpawnPoint *GetRandomTeamMemberSpawnPointForTeam(ETeam InTeam);
 
     UFUNCTION(BlueprintPure, meta = (AllowPrivateAccess))
     AFlagSpawnPoint *GetFlagSpawnPoint() const;

@@ -7,7 +7,6 @@ AFlagSpawnPoint::AFlagSpawnPoint() {
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
 #if WITH_EDITORONLY_DATA
-
     EditorIconComponent = CreateDefaultSubobject<UBillboardComponent>(TEXT("EditorIcon"));
     EditorIconComponent->SetupAttachment(RootComponent);
 #endif

@@ -71,19 +71,17 @@ void ATeamBase::IncrementTeamScore(AActor *PossibleTeamMember) {
     ETeam MemberTeam = TeamMemberPlayerState->GetCurrentTeam();
     FLAGNADO_RETURN_IF(MemberTeam != Team);
 
+    AFlagnadoGameMode *FlagnadoGameMode = GetWorld()->GetAuthGameMode<AFlagnadoGameMode>();
+    FLAGNADO_RETURN_IF(!FlagnadoGameMode);
+
+    TeamMemberFlagHolderComponent->DropFlag();
+
     if (HasAuthority()) {
+        FlagnadoGameMode->ResetFlag();
         HandleIncrementTeamScore();
     } else {
         Server_IncrementTeamScore();
     }
-
-    TeamMemberFlagHolderComponent->DropFlag();
-
-    AFlagnadoGameMode *FlagnadoGameMode =
-        UFlagnadoHelpers::GetGameMode<AFlagnadoGameMode>(GetWorld());
-    FLAGNADO_RETURN_IF(!FlagnadoGameMode);
-
-    FlagnadoGameMode->ResetFlag();
 }
 
 void ATeamBase::Server_IncrementTeamScore_Implementation() {
