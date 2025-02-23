@@ -14,9 +14,16 @@ class FLAGNADO_API AFlagSpawnPoint : public AActor {
 public:
     AFlagSpawnPoint();
 
+    FVector GetSpawnLocation() const {
+        return SpawnLocationReferenceComponent->GetComponentLocation();
+    }
+
 private:
     virtual void BeginPlay() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
     UBillboardComponent *EditorIconComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+    USceneComponent *SpawnLocationReferenceComponent;
 };

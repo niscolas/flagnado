@@ -10,6 +10,11 @@ AFlagSpawnPoint::AFlagSpawnPoint() {
     EditorIconComponent = CreateDefaultSubobject<UBillboardComponent>(TEXT("EditorIcon"));
     EditorIconComponent->SetupAttachment(RootComponent);
 #endif
+
+    SpawnLocationReferenceComponent =
+        CreateDefaultSubobject<USceneComponent>(TEXT("SpawnLocationReference"));
+    SpawnLocationReferenceComponent->SetRelativeLocation(FVector(0, 0, 50.f));
+    SpawnLocationReferenceComponent->SetupAttachment(RootComponent);
 }
 
 void AFlagSpawnPoint::BeginPlay() {

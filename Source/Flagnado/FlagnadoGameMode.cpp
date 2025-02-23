@@ -139,7 +139,7 @@ void AFlagnadoGameMode::SpawnFlag() {
     SpawnParams.SpawnCollisionHandlingOverride =
         ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-    FlagActor = GetWorld()->SpawnActor<AFlagnadoFlag>(FlagClass, FlagSpawnPoint->GetActorLocation(),
+    FlagActor = GetWorld()->SpawnActor<AFlagnadoFlag>(FlagClass, FlagSpawnPoint->GetSpawnLocation(),
                                                       FRotator::ZeroRotator, SpawnParams);
 }
 
@@ -149,7 +149,7 @@ void AFlagnadoGameMode::ResetFlag() {
     AFlagSpawnPoint *FlagSpawnPoint = GetFlagSpawnPoint();
     FLAGNADO_RETURN_IF(!FlagSpawnPoint);
 
-    FlagActor->SetActorLocation(FlagSpawnPoint->GetActorLocation());
+    FlagActor->SetActorLocation(FlagSpawnPoint->GetSpawnLocation());
 }
 
 AFlagSpawnPoint *AFlagnadoGameMode::GetFlagSpawnPoint() const {
