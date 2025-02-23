@@ -4,19 +4,18 @@
 #include "GameFramework/Actor.h"
 #include "FlagnadoProjectile.generated.h"
 
+class AFlagnadoCharacter;
 class USphereComponent;
 class UProjectileMovementComponent;
 
-UCLASS(config = Game)
+UCLASS()
 
-class AFlagnadoProjectile : public AActor {
+class FLAGNADO_API AFlagnadoProjectile : public AActor {
     GENERATED_BODY()
 
-    /** Sphere collision component */
     UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
     USphereComponent *CollisionComp;
 
-    /** Projectile movement component */
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
               Category = Movement,
@@ -26,7 +25,6 @@ class AFlagnadoProjectile : public AActor {
 public:
     AFlagnadoProjectile();
 
-    /** called when projectile hits something */
     UFUNCTION()
     void OnHit(UPrimitiveComponent *HitComp,
                AActor *OtherActor,
@@ -34,12 +32,10 @@ public:
                FVector NormalImpulse,
                const FHitResult &Hit);
 
-    /** Returns CollisionComp subobject **/
     USphereComponent *GetCollisionComp() const {
         return CollisionComp;
     }
 
-    /** Returns ProjectileMovement subobject **/
     UProjectileMovementComponent *GetProjectileMovement() const {
         return ProjectileMovement;
     }

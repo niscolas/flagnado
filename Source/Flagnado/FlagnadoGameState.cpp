@@ -85,10 +85,6 @@ TArray<UTeamData *> AFlagnadoGameState::GetTeamsData() const {
         TeamData->CurrentScore = TeamScoresValues[i];
         TeamData->TargetScore = NumFlagsToWin;
         Result.Add(TeamData);
-
-        UE_LOG(LogTemp, Warning, TEXT("(%s) Team: %s, %d, %d"),
-               *UFlagnadoHelpers::GetNetModeString(GetWorld()), *TeamData->Color.ToString(),
-               TeamData->CurrentScore, TeamData->TargetScore);
     }
 
     return Result;

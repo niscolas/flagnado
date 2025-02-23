@@ -34,10 +34,15 @@ public:
     AFlagnadoGameMode();
 
     void PostLogin(APlayerController *NewPlayer) override;
+
+    UFUNCTION()
     void ResetFlag();
 
     UFUNCTION()
     void ReloadGame();
+
+    UFUNCTION()
+    void SendPlayerToSpawnPoint(AController *PlayerController);
 
 private:
     UPROPERTY(EditDefaultsOnly,
@@ -80,7 +85,7 @@ private:
               BlueprintReadOnly,
               Category = "Game|Debug",
               meta = (AllowPrivateAccess))
-    TMap<APlayerController *, ATeamMemberSpawnPoint *> PlayersSpawnPoints;
+    TMap<AController *, ATeamMemberSpawnPoint *> PlayersSpawnPoints;
 
     bool HasFetchedExistingTeams;
 

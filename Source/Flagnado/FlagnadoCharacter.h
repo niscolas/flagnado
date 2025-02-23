@@ -18,6 +18,7 @@ class UFlagHolderComponent;
 class UAbilitiesProfileDataAsset;
 struct FInputActionValue;
 class UTeamsColorProfileDataAsset;
+class UTP_WeaponComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDied);
 
@@ -31,6 +32,9 @@ class AFlagnadoCharacter : public ACharacter, public IAbilitySystemInterface {
 public:
     AFlagnadoCharacter();
 
+    UFUNCTION(BlueprintCallable, Category = "Flagnado|Flagnado Character")
+    void Shoot();
+
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
     USkeletalMeshComponent *GetMesh1P() const {
@@ -42,6 +46,7 @@ public:
     }
 
     bool TryGetAssignedTeam(ETeam &OutTeam) const;
+    void OnShot();
 
 private:
     UPROPERTY(VisibleAnywhere,
@@ -110,6 +115,12 @@ private:
               meta = (AllowPrivateAccess))
     bool HasUpdatedMeshesProperly;
 
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Weapon|Debug",
+              meta = (AllowPrivateAccess))
+    UTP_WeaponComponent *WeaponComponent;
+
     virtual void BeginPlay();
     virtual void PossessedBy(AController *NewController) override;
     virtual void OnRep_PlayerState() override;
@@ -121,9 +132,6 @@ private:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_UpdateMeshesColorsOnce();
 
-    UFUNCTION()
-    void HandleUpdateMeshesColors();
-
     void SetupAbilitySystemComponent();
     void Move(const FInputActionValue &Value);
     void Look(const FInputActionValue &Value);
@@ -131,4 +139,14 @@ private:
 
     UPROPERTY()
     FTimerHandle TimerHandle;
+
+    UFUNCTION(Server, Reliable)
+    void Server_Shoot();
+
+    void HandleShoot();
+
+    UFUNCTION(Server, Reliable)
+    void Server_OnShot();
+
+    void HandleOnShot();
 };

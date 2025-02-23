@@ -75,7 +75,6 @@ void AFlagnadoGameMode::ReloadGame() {
     for (auto CharacterAndSpawnPointPair : PlayersSpawnPoints) {
         CharacterAndSpawnPointPair.Key->GetPawn()->SetActorLocation(
             CharacterAndSpawnPointPair.Value->GetSpawnLocation());
-
         CharacterAndSpawnPointPair.Key->GetPawn()->SetActorRotation(
             CharacterAndSpawnPointPair.Value->GetActorRotation());
     }
@@ -160,4 +159,13 @@ AFlagSpawnPoint *AFlagnadoGameMode::GetFlagSpawnPoint() const {
                                      TEXT("No FlagSpawnPoint found"));
 
     return FlagSpawnPoint;
+}
+
+void AFlagnadoGameMode::SendPlayerToSpawnPoint(AController *PlayerController) {
+    ATeamMemberSpawnPoint **SpawnPoint = PlayersSpawnPoints.Find(PlayerController);
+    FLAGNADO_LOG_AND_RETURN_IF(!SpawnPoint || !*SpawnPoint, LogTemp, Error,
+                               TEXT("Invalid SpawnPoint"));
+
+    PlayerController->GetPawn()->SetActorLocation((*SpawnPoint)->GetSpawnLocation());
+    PlayerController->GetPawn()->SetActorRotation((*SpawnPoint)->GetActorRotation());
 }

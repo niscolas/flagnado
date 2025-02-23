@@ -55,8 +55,6 @@ void AFlagnadoFlag::OnDropped() {
 
 void AFlagnadoFlag::OnRep_CollisionState() {
     FString NetModeStr = UFlagnadoHelpers::GetNetModeString(GetWorld());
-    UE_LOG(LogTemp, Warning, TEXT("[%s] OnRep_CollisionState called on %s. Collision: %s"),
-           *NetModeStr, *GetName(), ShouldEnableCollision ? TEXT("ENABLED") : TEXT("DISABLED"));
 
     if (ShouldEnableCollision) {
         SetCollisionToDefault();

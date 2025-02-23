@@ -111,7 +111,12 @@ void AFlagnadoCharacter::SetupAbilitySystemComponent() {
 }
 
 void AFlagnadoCharacter::SpawnAndAttachWeapon() {
+    UE_LOG(LogTemp, Warning, TEXT("(%s) Creating Weapon"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
+
     FActorSpawnParameters SpawnParameters;
+    SpawnParameters.Owner = this;
+    SpawnParameters.Instigator = this;
     SpawnParameters.SpawnCollisionHandlingOverride =
         ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
@@ -119,11 +124,35 @@ void AFlagnadoCharacter::SpawnAndAttachWeapon() {
                                                          FRotator::ZeroRotator, SpawnParameters);
     FLAGNADO_LOG_AND_RETURN_IF(!WeaponActor, LogTemp, Error, TEXT("Failed to spawn weapon"));
 
-    UTP_WeaponComponent *WeaponComponent = WeaponActor->GetComponentByClass<UTP_WeaponComponent>();
+    WeaponActor->SetOwner(this);
+
+    WeaponComponent = WeaponActor->GetComponentByClass<UTP_WeaponComponent>();
     FLAGNADO_LOG_AND_RETURN_IF(!WeaponComponent, LogTemp, Error,
                                TEXT("WeaponActor doesn't have a UTP_WeaponComponent"));
 
     WeaponComponent->AttachWeapon(this);
+}
+
+void AFlagnadoCharacter::Shoot() {
+    if (HasAuthority()) {
+        HandleShoot();
+    } else {
+        Server_Shoot();
+    }
+}
+
+void AFlagnadoCharacter::Server_Shoot_Implementation() {
+    HandleShoot();
+}
+
+void AFlagnadoCharacter::HandleShoot() {
+    UE_LOG(LogTemp, Warning, TEXT("(%s) Shooting %s"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
+
+    FLAGNADO_LOG_AND_RETURN_IF(!WeaponComponent, LogTemp, Error,
+                               TEXT("WeaponComponent doesn't exist"));
+
+    WeaponComponent->Fire();
 }
 
 bool AFlagnadoCharacter::TryGetAssignedTeam(ETeam &OutTeam) const {
@@ -159,9 +188,6 @@ void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
     HasUpdatedMeshesProperly = true;
 }
 
-void AFlagnadoCharacter::HandleUpdateMeshesColors() {
-}
-
 void AFlagnadoCharacter::Move(const FInputActionValue &Value) {
     FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -178,4 +204,28 @@ void AFlagnadoCharacter::Look(const FInputActionValue &Value) {
         AddControllerYawInput(LookAxisVector.X);
         AddControllerPitchInput(LookAxisVector.Y);
     }
+}
+
+void AFlagnadoCharacter::OnShot() {
+    if (HasAuthority()) {
+        HandleOnShot();
+    } else {
+        Server_OnShot();
+    }
+}
+
+void AFlagnadoCharacter::Server_OnShot_Implementation() {
+    HandleOnShot();
+}
+
+void AFlagnadoCharacter::HandleOnShot() {
+    UE_LOG(LogTemp, Warning, TEXT("(%s) OnShot %s"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
+
+    FlagHolderComponent->DropFlag();
+
+    AFlagnadoGameMode *FlagnadoGameMode = GetWorld()->GetAuthGameMode<AFlagnadoGameMode>();
+    FLAGNADO_RETURN_IF(!FlagnadoGameMode);
+
+    FlagnadoGameMode->SendPlayerToSpawnPoint(Controller);
 }

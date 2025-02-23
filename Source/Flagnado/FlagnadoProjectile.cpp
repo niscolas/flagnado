@@ -1,25 +1,21 @@
 #include "FlagnadoProjectile.h"
 #include "Components/SphereComponent.h"
+#include "Flagnado/FlagnadoHelpers.h"
+#include "FlagnadoCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "HelperMacros.h"
 
 AFlagnadoProjectile::AFlagnadoProjectile() {
-    // Use a sphere as a simple collision representation
     CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
     CollisionComp->InitSphereRadius(5.0f);
     CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-    CollisionComp->OnComponentHit.AddDynamic(
-        this,
-        &AFlagnadoProjectile::OnHit); // set up a notification for when this
-                                      // component hits something blocking
+    CollisionComp->OnComponentHit.AddDynamic(this, &AFlagnadoProjectile::OnHit);
 
-    // Players can't walk on it
     CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
     CollisionComp->CanCharacterStepUpOn = ECB_No;
 
-    // Set as root component
     RootComponent = CollisionComp;
 
-    // Use a ProjectileMovementComponent to govern this projectile's movement
     ProjectileMovement =
         CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
     ProjectileMovement->UpdatedComponent = CollisionComp;
@@ -28,8 +24,7 @@ AFlagnadoProjectile::AFlagnadoProjectile() {
     ProjectileMovement->bRotationFollowsVelocity = true;
     ProjectileMovement->bShouldBounce = true;
 
-    // Die after 3 seconds by default
-    InitialLifeSpan = 3.0f;
+    InitialLifeSpan = 3.f;
 }
 
 void AFlagnadoProjectile::OnHit(UPrimitiveComponent *HitComp,
@@ -37,11 +32,14 @@ void AFlagnadoProjectile::OnHit(UPrimitiveComponent *HitComp,
                                 UPrimitiveComponent *OtherComp,
                                 FVector NormalImpulse,
                                 const FHitResult &Hit) {
-    // Only add impulse and destroy projectile if we hit a physics
-    if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) &&
-        OtherComp->IsSimulatingPhysics()) {
-        OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+    FLAGNADO_RETURN_IF(!OtherActor || OtherActor == this || !OtherComp || OtherActor == Owner);
 
-        Destroy();
-    }
+    AFlagnadoCharacter *PossibleFlagnadoCharacter = Cast<AFlagnadoCharacter>(OtherActor);
+    FLAGNADO_RETURN_IF(!PossibleFlagnadoCharacter);
+
+    UE_LOG(LogTemp, Warning, TEXT("(%s) Projectile.OnHit %s"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *PossibleFlagnadoCharacter->GetName());
+
+    PossibleFlagnadoCharacter->OnShot();
+    Destroy();
 }
