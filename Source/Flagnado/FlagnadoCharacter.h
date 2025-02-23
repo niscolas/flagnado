@@ -33,7 +33,7 @@ public:
     AFlagnadoCharacter();
 
     UFUNCTION(BlueprintCallable, Category = "Flagnado|Flagnado Character")
-    void Shoot();
+    void OnShootInput();
 
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
@@ -142,8 +142,6 @@ private:
 
     UFUNCTION(Server, Reliable)
     void Server_Shoot();
-
-    void HandleShoot();
 
     UFUNCTION(Server, Reliable)
     void Server_OnShot();

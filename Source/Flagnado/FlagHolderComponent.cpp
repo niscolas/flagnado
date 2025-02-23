@@ -105,6 +105,7 @@ void UFlagHolderComponent::DropFlag() {
 
         Server_StartPickFlagAbilityCooldown();
 
+        FlagActor->SetActorLocation(GetOwner()->GetActorLocation());
         FlagActor->OnDropped();
         FlagActor = nullptr;
     }

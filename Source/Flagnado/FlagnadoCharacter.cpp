@@ -133,19 +133,12 @@ void AFlagnadoCharacter::SpawnAndAttachWeapon() {
     WeaponComponent->AttachWeapon(this);
 }
 
-void AFlagnadoCharacter::Shoot() {
-    if (HasAuthority()) {
-        HandleShoot();
-    } else {
-        Server_Shoot();
-    }
+void AFlagnadoCharacter::OnShootInput() {
+    Server_Shoot();
+    WeaponComponent->PlayFireFX();
 }
 
 void AFlagnadoCharacter::Server_Shoot_Implementation() {
-    HandleShoot();
-}
-
-void AFlagnadoCharacter::HandleShoot() {
     UE_LOG(LogTemp, Warning, TEXT("(%s) Shooting %s"),
            *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
 

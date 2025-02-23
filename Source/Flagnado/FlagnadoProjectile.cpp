@@ -37,9 +37,13 @@ void AFlagnadoProjectile::OnHit(UPrimitiveComponent *HitComp,
     AFlagnadoCharacter *PossibleFlagnadoCharacter = Cast<AFlagnadoCharacter>(OtherActor);
     FLAGNADO_RETURN_IF(!PossibleFlagnadoCharacter);
 
-    UE_LOG(LogTemp, Warning, TEXT("(%s) Projectile.OnHit %s"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *PossibleFlagnadoCharacter->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("(%s) (%s) Projectile.OnHit %s"),
+           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *Owner->GetActorNameOrLabel(),
+           *PossibleFlagnadoCharacter->GetName());
 
-    PossibleFlagnadoCharacter->OnShot();
+    if (HasAuthority()) {
+        PossibleFlagnadoCharacter->OnShot();
+    }
+
     Destroy();
 }

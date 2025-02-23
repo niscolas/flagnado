@@ -9,6 +9,7 @@
 #include "FlagnadoHelpers.h"
 #include "FlagnadoProjectile.h"
 #include "GameFramework/PlayerController.h"
+#include "HelperMacros.h"
 #include "Kismet/GameplayStatics.h"
 
 UTP_WeaponComponent::UTP_WeaponComponent() {
@@ -16,48 +17,39 @@ UTP_WeaponComponent::UTP_WeaponComponent() {
 }
 
 void UTP_WeaponComponent::Fire() {
-    UE_LOG(LogTemp, Warning, TEXT("(%s) Spawning projectile"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
+    FLAGNADO_RETURN_IF(!Character || !Character->GetController() || !ProjectileClass);
 
-    if (Character == nullptr || Character->GetController() == nullptr) {
-        return;
+    UWorld *const World = GetWorld();
+    FLAGNADO_RETURN_IF(!World);
+
+    APlayerController *PlayerController = Cast<APlayerController>(Character->GetController());
+    const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+    const FVector SpawnLocation =
+        GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+    FActorSpawnParameters ActorSpawnParams;
+    ActorSpawnParams.Owner = Character;
+    ActorSpawnParams.Instigator = Character;
+    ActorSpawnParams.SpawnCollisionHandlingOverride =
+        ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+    AActor *ProjectileActor = World->SpawnActor<AFlagnadoProjectile>(
+        ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+    if (ProjectileActor) {
+        ProjectileActor->SetOwner(Character);
     }
+}
 
-    if (ProjectileClass != nullptr) {
-        UE_LOG(LogTemp, Warning, TEXT("(%s) Fire() %s"),
-               *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
-
-        UWorld *const World = GetWorld();
-        if (World != nullptr) {
-            APlayerController *PlayerController =
-                Cast<APlayerController>(Character->GetController());
-            const FRotator SpawnRotation =
-                PlayerController->PlayerCameraManager->GetCameraRotation();
-            const FVector SpawnLocation =
-                GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-
-            FActorSpawnParameters ActorSpawnParams;
-            ActorSpawnParams.Owner = Character;
-            ActorSpawnParams.Instigator = Character;
-            ActorSpawnParams.SpawnCollisionHandlingOverride =
-                ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-
-            AActor *ProjectileActor = World->SpawnActor<AFlagnadoProjectile>(
-                ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-
-            if (ProjectileActor) {
-                ProjectileActor->SetOwner(Character);
-            }
-        }
-    }
-
-    if (FireSound != nullptr) {
+void UTP_WeaponComponent::PlayFireFX() {
+    if (FireSound) {
         UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
     }
 
-    if (FireAnimation != nullptr) {
+    if (FireAnimation) {
         UAnimInstance *AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-        if (AnimInstance != nullptr) {
+
+        if (AnimInstance) {
             AnimInstance->Montage_Play(FireAnimation, 1.f);
         }
     }
@@ -66,28 +58,29 @@ void UTP_WeaponComponent::Fire() {
 bool UTP_WeaponComponent::AttachWeapon(AFlagnadoCharacter *TargetCharacter) {
     Character = TargetCharacter;
 
-    if (Character == nullptr ||
-        Character->GetInstanceComponents().FindItemByClass<UTP_WeaponComponent>()) {
-        return false;
-    }
+    FLAGNADO_RETURN_VALUE_IF(
+        Character == nullptr ||
+            Character->GetInstanceComponents().FindItemByClass<UTP_WeaponComponent>(),
+        false);
 
     FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
     AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 
     Character->AddInstanceComponent(this);
 
-    if (APlayerController *PlayerController = Cast<APlayerController>(Character->GetController())) {
-        if (UEnhancedInputLocalPlayerSubsystem *Subsystem =
-                ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
-                    PlayerController->GetLocalPlayer())) {
-            Subsystem->AddMappingContext(FireMappingContext, 1);
-        }
+    APlayerController *PlayerController = Cast<APlayerController>(Character->GetController());
+    FLAGNADO_RETURN_VALUE_IF(!PlayerController, true);
 
-        if (UEnhancedInputComponent *EnhancedInputComponent =
-                Cast<UEnhancedInputComponent>(PlayerController->InputComponent)) {
-            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, Character,
-                                               &AFlagnadoCharacter::Shoot);
-        }
+    if (UEnhancedInputLocalPlayerSubsystem *Subsystem =
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+                PlayerController->GetLocalPlayer())) {
+        Subsystem->AddMappingContext(FireMappingContext, 1);
+    }
+
+    if (UEnhancedInputComponent *EnhancedInputComponent =
+            Cast<UEnhancedInputComponent>(PlayerController->InputComponent)) {
+        EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, Character,
+                                           &AFlagnadoCharacter::OnShootInput);
     }
 
     return true;
