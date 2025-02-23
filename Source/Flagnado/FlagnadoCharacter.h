@@ -62,8 +62,14 @@ private:
               meta = (AllowPrivateAccess))
     UAbilitySystemComponent *AbilitySystemComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess))
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Capture The Flag",
+              meta = (AllowPrivateAccess))
     UFlagHolderComponent *FlagHolderComponent;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess))
+    TSubclassOf<AActor> WeaponClass;
 
     UPROPERTY(EditAnywhere,
               BlueprintReadOnly,
@@ -100,7 +106,7 @@ private:
 
     UPROPERTY(VisibleAnywhere,
               BlueprintReadOnly,
-              Category = "Flagnado Character|Debug",
+              Category = "Materials|Debug",
               meta = (AllowPrivateAccess))
     bool HasUpdatedMeshesProperly;
 
@@ -121,6 +127,7 @@ private:
     void SetupAbilitySystemComponent();
     void Move(const FInputActionValue &Value);
     void Look(const FInputActionValue &Value);
+    void SpawnAndAttachWeapon();
 
     UPROPERTY()
     FTimerHandle TimerHandle;

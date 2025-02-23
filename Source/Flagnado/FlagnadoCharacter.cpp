@@ -21,6 +21,7 @@
 #include "FlagnadoProjectile.h"
 #include "InputActionValue.h"
 #include "Logging/LogMacros.h"
+#include "TP_WeaponComponent.h"
 #include "TeamsColorProfileDataAsset.h"
 #include "TimerManager.h"
 
@@ -55,6 +56,7 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
 
 void AFlagnadoCharacter::BeginPlay() {
     Super::BeginPlay();
+    SpawnAndAttachWeapon();
 }
 
 void AFlagnadoCharacter::PossessedBy(AController *NewController) {
@@ -106,6 +108,22 @@ void AFlagnadoCharacter::SetupAbilitySystemComponent() {
                                TEXT("Will not Give All Abilities to Character, "
                                     "didn't load Profile properly"));
     LoadedAbilitiesDataAsset->GiveAllTo(AbilitySystemComponent);
+}
+
+void AFlagnadoCharacter::SpawnAndAttachWeapon() {
+    FActorSpawnParameters SpawnParameters;
+    SpawnParameters.SpawnCollisionHandlingOverride =
+        ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+    AActor *WeaponActor = GetWorld()->SpawnActor<AActor>(WeaponClass, FVector::ZeroVector,
+                                                         FRotator::ZeroRotator, SpawnParameters);
+    FLAGNADO_LOG_AND_RETURN_IF(!WeaponActor, LogTemp, Error, TEXT("Failed to spawn weapon"));
+
+    UTP_WeaponComponent *WeaponComponent = WeaponActor->GetComponentByClass<UTP_WeaponComponent>();
+    FLAGNADO_LOG_AND_RETURN_IF(!WeaponComponent, LogTemp, Error,
+                               TEXT("WeaponActor doesn't have a UTP_WeaponComponent"));
+
+    WeaponComponent->AttachWeapon(this);
 }
 
 bool AFlagnadoCharacter::TryGetAssignedTeam(ETeam &OutTeam) const {
