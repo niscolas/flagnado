@@ -9,7 +9,7 @@ class UMaterialInterface;
 
 UCLASS()
 
-class FLAGNADO_API UTeamsColorProfileDataAsset : public UDataAsset {
+class FLAGNADO_API UTeamsColorProfileDataAsset : public UPrimaryDataAsset {
     GENERATED_BODY()
 
 public:
