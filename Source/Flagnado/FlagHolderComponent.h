@@ -3,10 +3,14 @@
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
 #include "Templates/SubclassOf.h"
+#include "UObject/ObjectMacros.h"
 #include "FlagHolderComponent.generated.h"
 
 class UAbilitySystemComponent;
 class AFlagnadoFlag;
+
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FIsHoldingTheFlagChanged, bool, NewValue);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
@@ -24,8 +28,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Flagnado|Flag Holder")
     void DropFlag();
-
-    void OnFlagPickedUpSuccessfully();
 
 private:
     virtual void BeginPlay() override;
@@ -60,6 +62,9 @@ private:
               Category = "Flag Holder|Debug",
               meta = (AllowPrivateAccess))
     AFlagnadoFlag *FlagActor;
+
+    UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess))
+    FIsHoldingTheFlagChanged IsHoldingTheFlagChanged;
 
     UPROPERTY()
     FTimerHandle PickFlagCooldownTimer;

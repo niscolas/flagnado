@@ -12,7 +12,6 @@
 #include "HelperMacros.h"
 #include "Logging/LogMacros.h"
 #include "Net/UnrealNetwork.h"
-#include "PickFlagGameplayAbility.h"
 #include "TimerManager.h"
 
 UFlagHolderComponent::UFlagHolderComponent() {
@@ -69,14 +68,10 @@ void UFlagHolderComponent::TryPickupFlag(AActor *PossibleFlagActor) {
     OwnerAbilitySystemComponent->AddLooseGameplayTag(
         FlagnadoGameplayTags::Player_Status_HoldingTheFlag);
 
-    OnFlagPickedUpSuccessfully();
+    FlagActor->OnPickedUp();
+    IsHoldingTheFlagChanged.Broadcast(true);
 
     Server_StartPickFlagAbilityCooldown();
-}
-
-void UFlagHolderComponent::OnFlagPickedUpSuccessfully() {
-    FLAGNADO_RETURN_IF(!FlagActor);
-    FlagActor->OnPickedUp();
 }
 
 void UFlagHolderComponent::Server_StartPickFlagAbilityCooldown_Implementation() {
@@ -108,6 +103,8 @@ void UFlagHolderComponent::DropFlag() {
         FlagActor->SetActorLocation(GetOwner()->GetActorLocation());
         FlagActor->OnDropped();
         FlagActor = nullptr;
+
+        IsHoldingTheFlagChanged.Broadcast(false);
     }
 }
 
