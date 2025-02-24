@@ -64,12 +64,15 @@ void AFlagnadoCharacter::PossessedBy(AController *NewController) {
 
     SetupAbilitySystemComponent();
     GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
-                                    10.f, false);
+                                    1.f, false);
 }
 
 void AFlagnadoCharacter::OnRep_PlayerState() {
     Super::OnRep_PlayerState();
+
     PlayerStateUpdated.Broadcast();
+    GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
+                                    1.f, false);
 }
 
 UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {
@@ -158,11 +161,11 @@ bool AFlagnadoCharacter::TryGetAssignedTeam(ETeam &OutTeam) const {
     return true;
 }
 
-void AFlagnadoCharacter::Server_UpdateMeshesColorsOnce_Implementation() {
-    Multicast_UpdateMeshesColorsOnce();
+void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
+    HandleUpdateMeshesColorsOnce();
 }
 
-void AFlagnadoCharacter::Multicast_UpdateMeshesColorsOnce_Implementation() {
+void AFlagnadoCharacter::HandleUpdateMeshesColorsOnce() {
     FLAGNADO_RETURN_IF(HasUpdatedMeshesProperly);
     FLAGNADO_LOG_AND_RETURN_IF(!TeamsColorProfileDataAsset, LogTemp, Error,
                                TEXT("(%s) Invalid TeamsColorProfileDataAsset"),

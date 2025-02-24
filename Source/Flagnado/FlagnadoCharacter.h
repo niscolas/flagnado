@@ -134,11 +134,10 @@ private:
     virtual void OnRep_PlayerState() override;
     virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 
-    UFUNCTION(Server, Reliable)
-    void Server_UpdateMeshesColorsOnce();
-
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_UpdateMeshesColorsOnce();
+
+    void HandleUpdateMeshesColorsOnce();
 
     void SetupAbilitySystemComponent();
     void Move(const FInputActionValue &Value);
