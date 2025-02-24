@@ -69,6 +69,7 @@ void AFlagnadoCharacter::PossessedBy(AController *NewController) {
 
 void AFlagnadoCharacter::OnRep_PlayerState() {
     Super::OnRep_PlayerState();
+    PlayerStateUpdated.Broadcast();
 }
 
 UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {

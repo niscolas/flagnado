@@ -6,6 +6,7 @@
 #include "Flagnado/MiscTypes.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "UObject/ObjectMacros.h"
 #include "FlagnadoCharacter.generated.h"
 
 class UInputComponent;
@@ -20,7 +21,11 @@ struct FInputActionValue;
 class UTeamsColorProfileDataAsset;
 class UTP_WeaponComponent;
 
+UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDied);
+
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerStateUpdated);
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -105,6 +110,9 @@ private:
               Category = "State",
               meta = (AllowPrivateAccess))
     FDied Died;
+
+    UPROPERTY(BlueprintAssignable)
+    FPlayerStateUpdated PlayerStateUpdated;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
     UTeamsColorProfileDataAsset *TeamsColorProfileDataAsset;
