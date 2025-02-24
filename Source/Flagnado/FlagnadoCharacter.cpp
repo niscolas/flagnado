@@ -52,6 +52,12 @@ AFlagnadoCharacter::AFlagnadoCharacter() {
         CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
     FlagHolderComponent = CreateDefaultSubobject<UFlagHolderComponent>(TEXT("FlagHolderComponent"));
+
+    TeamEnumToTagMap.Add(ETeam::Red, FlagnadoGameplayTags::Player_Team_Red);
+    TeamEnumToTagMap.Add(ETeam::Blue, FlagnadoGameplayTags::Player_Team_Blue);
+    TeamEnumToTagMap.Add(ETeam::Green, FlagnadoGameplayTags::Player_Team_Green);
+    TeamEnumToTagMap.Add(ETeam::Yellow, FlagnadoGameplayTags::Player_Team_Yellow);
+    TeamEnumToTagMap.Add(ETeam::Purple, FlagnadoGameplayTags::Player_Team_Purple);
 }
 
 void AFlagnadoCharacter::BeginPlay() {
@@ -63,16 +69,18 @@ void AFlagnadoCharacter::PossessedBy(AController *NewController) {
     Super::PossessedBy(NewController);
 
     SetupAbilitySystemComponent();
-    GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
-                                    1.f, false);
+    GetWorldTimerManager().SetTimer(UpdateMeshesColorsTimerHandle, this,
+                                    &ThisClass::Multicast_UpdateMeshesColorsOnce, 1.f, false);
+    GetWorldTimerManager().SetTimer(AddTeamTagTimerHandle, this, &ThisClass::AddTeamTag, 1.f,
+                                    false);
 }
 
 void AFlagnadoCharacter::OnRep_PlayerState() {
     Super::OnRep_PlayerState();
 
     PlayerStateUpdated.Broadcast();
-    GetWorldTimerManager().SetTimer(TimerHandle, this, &ThisClass::Multicast_UpdateMeshesColorsOnce,
-                                    1.f, false);
+    GetWorldTimerManager().SetTimer(UpdateMeshesColorsTimerHandle, this,
+                                    &ThisClass::Multicast_UpdateMeshesColorsOnce, 1.f, false);
 }
 
 UAbilitySystemComponent *AFlagnadoCharacter::GetAbilitySystemComponent() const {
@@ -114,10 +122,19 @@ void AFlagnadoCharacter::SetupAbilitySystemComponent() {
     LoadedAbilitiesDataAsset->GiveAllTo(AbilitySystemComponent);
 }
 
-void AFlagnadoCharacter::SpawnAndAttachWeapon() {
-    UE_LOG(LogTemp, Warning, TEXT("(%s) Creating Weapon"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()));
+void AFlagnadoCharacter::AddTeamTag() {
+    FLAGNADO_RETURN_IF(!HasAuthority());
 
+    AFlagnadoPlayerState *PlayerState = GetPlayerState<AFlagnadoPlayerState>();
+    FLAGNADO_RETURN_IF(!PlayerState);
+
+    FGameplayTag *TeamTag = TeamEnumToTagMap.Find(PlayerState->GetCurrentTeam());
+    FLAGNADO_RETURN_IF(!TeamTag);
+
+    AbilitySystemComponent->AddLooseGameplayTag(*TeamTag);
+}
+
+void AFlagnadoCharacter::SpawnAndAttachWeapon() {
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Owner = this;
     SpawnParameters.Instigator = this;
@@ -143,9 +160,6 @@ void AFlagnadoCharacter::OnShootInput() {
 }
 
 void AFlagnadoCharacter::Server_Shoot_Implementation() {
-    UE_LOG(LogTemp, Warning, TEXT("(%s) Shooting %s"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
-
     FLAGNADO_LOG_AND_RETURN_IF(!WeaponComponent, LogTemp, Error,
                                TEXT("WeaponComponent doesn't exist"));
 
@@ -216,9 +230,6 @@ void AFlagnadoCharacter::Server_OnShot_Implementation() {
 }
 
 void AFlagnadoCharacter::HandleOnShot() {
-    UE_LOG(LogTemp, Warning, TEXT("(%s) OnShot %s"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *this->GetName());
-
     FlagHolderComponent->DropFlag();
 
     AFlagnadoGameMode *FlagnadoGameMode = GetWorld()->GetAuthGameMode<AFlagnadoGameMode>();

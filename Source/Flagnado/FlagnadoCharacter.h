@@ -5,6 +5,7 @@
 #include "Engine/TimerHandle.h"
 #include "Flagnado/MiscTypes.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
 #include "Logging/LogMacros.h"
 #include "UObject/ObjectMacros.h"
 #include "FlagnadoCharacter.generated.h"
@@ -129,6 +130,12 @@ private:
               meta = (AllowPrivateAccess))
     UTP_WeaponComponent *WeaponComponent;
 
+    UPROPERTY(VisibleAnywhere,
+              BlueprintReadOnly,
+              Category = "Capture The Flag|Debug",
+              meta = (AllowPrivateAccess))
+    TMap<ETeam, FGameplayTag> TeamEnumToTagMap;
+
     virtual void BeginPlay();
     virtual void PossessedBy(AController *NewController) override;
     virtual void OnRep_PlayerState() override;
@@ -139,13 +146,17 @@ private:
 
     void HandleUpdateMeshesColorsOnce();
 
+    void AddTeamTag();
     void SetupAbilitySystemComponent();
     void Move(const FInputActionValue &Value);
     void Look(const FInputActionValue &Value);
     void SpawnAndAttachWeapon();
 
     UPROPERTY()
-    FTimerHandle TimerHandle;
+    FTimerHandle UpdateMeshesColorsTimerHandle;
+
+    UPROPERTY()
+    FTimerHandle AddTeamTagTimerHandle;
 
     UFUNCTION(Server, Reliable)
     void Server_Shoot();

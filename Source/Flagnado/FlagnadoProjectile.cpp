@@ -1,7 +1,7 @@
 #include "FlagnadoProjectile.h"
 #include "Components/SphereComponent.h"
-#include "Flagnado/FlagnadoHelpers.h"
 #include "FlagnadoCharacter.h"
+#include "FlagnadoHelpers.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "HelperMacros.h"
 
@@ -33,13 +33,10 @@ void AFlagnadoProjectile::OnHit(UPrimitiveComponent *HitComp,
                                 FVector NormalImpulse,
                                 const FHitResult &Hit) {
     FLAGNADO_RETURN_IF(!OtherActor || OtherActor == this || !OtherComp || OtherActor == Owner);
+    FLAGNADO_RETURN_IF(UFlagnadoHelpers::CheckHaveSameTeam(Owner, OtherActor));
 
     AFlagnadoCharacter *PossibleFlagnadoCharacter = Cast<AFlagnadoCharacter>(OtherActor);
     FLAGNADO_RETURN_IF(!PossibleFlagnadoCharacter);
-
-    UE_LOG(LogTemp, Warning, TEXT("(%s) (%s) Projectile.OnHit %s"),
-           *UFlagnadoHelpers::GetNetModeString(GetWorld()), *Owner->GetActorNameOrLabel(),
-           *PossibleFlagnadoCharacter->GetName());
 
     if (HasAuthority()) {
         PossibleFlagnadoCharacter->OnShot();
