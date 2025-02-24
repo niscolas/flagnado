@@ -65,11 +65,11 @@ void AFlagnadoFlag::OnRep_CollisionState() {
 
 void AFlagnadoFlag::SetCollisionToDefault() {
     SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
+    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
     SphereCollider->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
 void AFlagnadoFlag::DisableCollision() {
     SphereCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
+    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
 }

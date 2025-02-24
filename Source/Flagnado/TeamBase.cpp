@@ -24,7 +24,7 @@ ATeamBase::ATeamBase() {
     SphereCollider->SetupAttachment(RootComponent);
     SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     SphereCollider->SetCollisionObjectType(ECC_WorldDynamic);
-    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
+    SphereCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
     SphereCollider->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
     SphereCollider->SetSphereRadius(300.f);
 }

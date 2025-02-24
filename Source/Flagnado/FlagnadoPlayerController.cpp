@@ -5,11 +5,8 @@
 void AFlagnadoPlayerController::BeginPlay() {
     Super::BeginPlay();
 
-    // get the enhanced input subsystem
     if (UEnhancedInputLocalPlayerSubsystem *Subsystem =
-            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
-                GetLocalPlayer())) {
-        // add the mapping context so we get controls
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) {
         Subsystem->AddMappingContext(InputMappingContext, 0);
     }
 }

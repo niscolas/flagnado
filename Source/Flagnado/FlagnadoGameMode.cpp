@@ -57,9 +57,6 @@ void AFlagnadoGameMode::PostLogin(APlayerController *NewPlayer) {
         FVector DirectionToFlag = (FlagActor->GetActorLocation() - SpawnLocation).GetSafeNormal();
         FRotator LookAtFlagRotation = DirectionToFlag.Rotation();
 
-        // NewPlayer->SetControlRotation(LookAtFlagRotation);
-        // NewPlayer->GetPawn()->SetActorRotation(LookAtFlagRotation);
-
         PlayersSpawnPoints.Add(NewPlayer, SpawnPoint);
     });
 }
