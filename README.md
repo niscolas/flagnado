@@ -9,6 +9,10 @@
 - **UI & Feedback:** Score display, flag indicator, team indicator, and crosshair for improved aiming.
 - **Visual Polish & Level Design:** Enhanced user feedback and a basic level layout with proper team separation.
 
+## 🎥 Preview
+
+https://github.com/user-attachments/assets/7b50b486-414f-4307-a5ef-d9f414ba5b25
+
 ## 📦 Assets Used
 
 As always, great thanks to https://kenney.nl for the amazing assets! (Some 3D assets and UI)
